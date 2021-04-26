@@ -1,6 +1,6 @@
 use tree_sitter::Tree;
 
-pub fn count_tokens(tree: Tree) -> u64 {
+pub fn count_tokens(tree: &Tree) -> u64 {
     let mut ntokens = 0;
     let mut cursor = tree.walk();
 
