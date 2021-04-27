@@ -48,4 +48,16 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_counting_rust() {
+        let files = vec![
+            PathBuf::from("./test_data/rust1.rs"),
+            PathBuf::from("./test_data/rust2.rs"),
+        ];
+        let mut expected = BTreeMap::new();
+        expected.insert(parser::Language::Rust, 484);
+        let got = counts(files);
+        assert_eq!(got, expected);
+    }
 }
