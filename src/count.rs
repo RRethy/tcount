@@ -8,7 +8,7 @@ pub fn count_tokens(tree: &Tree) -> u64 {
     'outer: loop {
         let node = cursor.node();
         // TODO handle comments via cli maybe
-        if !node.is_named() && !node.is_extra() && !node.is_missing() {
+        if node.child_count() == 0 && !node.is_extra() && !node.is_missing() {
             // TODO what if this is not a terminal node
             ntokens += 1;
         }

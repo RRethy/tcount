@@ -11,25 +11,34 @@ mod parser;
 use count::count_tokens;
 use error::Error;
 
-fn counts(files: Vec<PathBuf>) -> BTreeMap<parser::Language, u64> {
-    files
-        .into_iter()
+fn counts(files: &Vec<PathBuf>) -> (BTreeMap<parser::Language, u64>, Vec<Error>) {
+    let (parsed, errors): (Vec<_>, Vec<_>) = files
+        .iter()
         .map(|path| match parser::parse(&path) {
             Ok((tree, lang)) => Ok((lang, count_tokens(&tree))),
             Err(err) => Err(err),
         })
-        .filter(Result::is_ok)
-        .map(Result::unwrap)
-        .fold(BTreeMap::new(), |mut acc, (lang, count)| {
-            *acc.entry(lang).or_insert(0) += count;
-            acc
-        })
+        .partition(Result::is_ok);
+    let counts =
+        parsed
+            .into_iter()
+            .map(Result::unwrap)
+            .fold(BTreeMap::new(), |mut acc, (lang, count)| {
+                *acc.entry(lang).or_insert(0) += count;
+                acc
+            });
+    (counts, errors.into_iter().map(Result::unwrap_err).collect())
 }
 
 fn run(cli: cli::Cli) -> Result<(), Error> {
-    counts(cli.files)
+    let (langs, errors) = counts(&cli.files);
+    langs
         .iter()
         .for_each(|(lang, count)| println!("{:?}: {}", lang, count));
+    if cli.verbose {
+        // TODO print this nicer
+        eprintln!("{:?}", errors);
+    }
     Ok(())
 }
 
@@ -56,8 +65,8 @@ mod tests {
             PathBuf::from("./test_data/rust2.rs"),
         ];
         let mut expected = BTreeMap::new();
-        expected.insert(parser::Language::RUST, 37);
-        let got = counts(files);
+        expected.insert(parser::Language::RUST, 35 + 20);
+        let (got, _) = counts(&files);
         assert_eq!(got, expected);
     }
 }
