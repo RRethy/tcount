@@ -7,6 +7,9 @@ pub struct Cli {
     #[structopt(short, long)]
     pub verbose: bool,
 
+    #[structopt(short, long)]
+    pub kind: Vec<String>,
+
     #[structopt()]
     pub files: Vec<PathBuf>,
 }

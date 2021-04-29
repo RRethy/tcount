@@ -44,7 +44,6 @@ fn run(cli: cli::Cli) -> Result<(), Error> {
 
 fn main() {
     let cli = cli::Cli::from_args();
-
     match run(cli) {
         Err(err) => {
             eprintln!("{}", err);
@@ -65,7 +64,7 @@ mod tests {
             PathBuf::from("./test_data/rust2.rs"),
         ];
         let mut expected = BTreeMap::new();
-        expected.insert(parser::Language::RUST, 35 + 20);
+        expected.insert(parser::Language::Rust, 35 + 20);
         let (got, _) = counts(&files);
         assert_eq!(got, expected);
     }
