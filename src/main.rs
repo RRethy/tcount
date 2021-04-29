@@ -56,7 +56,7 @@ mod tests {
             PathBuf::from("./test_data/rust2.rs"),
         ];
         let mut expected = BTreeMap::new();
-        expected.insert(parser::Language::RUST, 484);
+        expected.insert(parser::Language::RUST, 37);
         let got = counts(files);
         assert_eq!(got, expected);
     }
