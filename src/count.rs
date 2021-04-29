@@ -7,8 +7,9 @@ pub fn count_tokens(tree: &Tree) -> u64 {
     // preoder traversal of the concrete syntax tree
     'outer: loop {
         let node = cursor.node();
-        // TOOD handle comments via cli maybe
-        if !node.is_extra() && !node.is_missing() {
+        // TODO handle comments via cli maybe
+        if !node.is_named() && !node.is_extra() && !node.is_missing() {
+            // TODO what if this is not a terminal node
             ntokens += 1;
         }
         if !cursor.goto_first_child() && !cursor.goto_next_sibling() {
