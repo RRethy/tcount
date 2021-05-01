@@ -8,5 +8,5 @@ fn main() {
     /*
     this is a big comment
     */
-    map.insert("one\n", "two\n");
+    map.insert("one\n", r"two\n");
 }

@@ -3,7 +3,7 @@ use std::cmp::{Eq, Ord, PartialEq, PartialOrd};
 use std::ffi::OsString;
 use std::path::Path;
 
-#[derive(Clone, Debug, PartialOrd, PartialEq, Eq, Ord)]
+#[derive(Clone, Debug, PartialOrd, PartialEq, Eq, Ord, Hash)]
 pub enum Language {
     Bash,
     Bibtex,
@@ -32,7 +32,7 @@ pub enum Language {
     Svelte,
     Typescript,
     Tsx,
-    Unsupported(String),
+    Unsupported,
 }
 
 impl Language {
@@ -65,26 +65,26 @@ impl Language {
             Language::Svelte => Ok(tree_sitter_svelte::language()),
             Language::Typescript => Ok(tree_sitter_typescript::language_typescript()),
             Language::Tsx => Ok(tree_sitter_typescript::language_tsx()),
-            Language::Unsupported(ext) => return Err(Error::Unsupported(ext.into())),
+            Language::Unsupported => return Err(Error::UnsupportedLanguage),
         }
     }
 }
 
-impl<P: AsRef<Path>> From<P> for Language {
-    fn from(path: P) -> Language {
-        let ext = path
-            .as_ref()
-            .extension()
-            .map(OsString::from)
-            .unwrap_or(OsString::new());
-        LANGUAGES
-            .get(ext.to_string_lossy().as_ref())
-            .unwrap_or(&Language::Unsupported(ext.to_string_lossy().to_string()))
+impl From<&Path> for Language {
+    fn from(path: &Path) -> Language {
+        let (tag, map) = if path.is_dir() {
+            (path.file_name(), &DIR_TO_LANGUAGE)
+        } else {
+            (path.extension(), &EXT_TO_LANGUAGE)
+        };
+        let tag = tag.map(OsString::from).unwrap_or(OsString::new());
+        map.get(tag.to_string_lossy().as_ref())
+            .unwrap_or(&Language::Unsupported)
             .clone()
     }
 }
 
-static LANGUAGES: phf::Map<&'static str, Language> = phf::phf_map! {
+static EXT_TO_LANGUAGE: phf::Map<&'static str, Language> = phf::phf_map! {
     "bash"   => Language::Bash,
     "bib"    => Language::Bibtex,
     "c"      => Language::C,
@@ -124,4 +124,34 @@ static LANGUAGES: phf::Map<&'static str, Language> = phf::phf_map! {
     "svelte" => Language::Svelte,
     "ts"     => Language::Typescript,
     "tsx"    => Language::Tsx,
+};
+
+static DIR_TO_LANGUAGE: phf::Map<&'static str, Language> = phf::phf_map! {
+    "bash"             => Language::Bash,
+    "bibtex"           => Language::Bibtex,
+    "c"                => Language::C,
+    "csharp"           => Language::CSharp,
+    "clojure"          => Language::Clojure,
+    "cpp"              => Language::Cpp,
+    "css"              => Language::Css,
+    "elm"              => Language::Elm,
+    "embeddedtemplate" => Language::EmbeddedTemplate,
+    "go"               => Language::Go,
+    "html"             => Language::Html,
+    "java"             => Language::Java,
+    "javascript"       => Language::Javascript,
+    "json"             => Language::Json,
+    "julia"            => Language::Julia,
+    "latex"            => Language::Latex,
+    "markdown"         => Language::Markdown,
+    "ocaml"            => Language::Ocaml,
+    "ocamlinterface"   => Language::OcamlInterface,
+    "python"           => Language::Python,
+    "query"            => Language::Query,
+    "ruby"             => Language::Ruby,
+    "rust"             => Language::Rust,
+    "scala"            => Language::Scala,
+    "svelte"           => Language::Svelte,
+    "typescript"       => Language::Typescript,
+    "tsx"              => Language::Tsx,
 };

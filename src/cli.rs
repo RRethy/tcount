@@ -10,6 +10,12 @@ pub struct Cli {
     #[structopt(short, long)]
     pub kind: Vec<String>,
 
+    #[structopt(long)]
+    pub query_dir: Option<PathBuf>,
+
+    #[structopt(short, long)]
+    pub query: Vec<String>,
+
     #[structopt()]
     pub files: Vec<PathBuf>,
 }
