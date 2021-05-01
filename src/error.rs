@@ -1,6 +1,8 @@
 use std::fmt::{self, Display};
 use std::io;
 
+pub type Result<T> = std::result::Result<T, Error>;
+
 #[derive(Debug)]
 pub enum Error {
     IO(io::Error),
