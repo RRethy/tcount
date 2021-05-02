@@ -77,11 +77,9 @@ impl Counts {
             Some(tree) => {
                 if let Some(queries) = queries.get(&lang) {
                     queries.iter().enumerate().for_each(|(i, query)| {
-                        if let Some(query) = query {
-                            counts.nqueries[i] += qcursor
-                                .matches(query, tree.root_node(), text_callback)
-                                .count() as u64;
-                        }
+                        counts.nqueries[i] += qcursor
+                            .matches(query, tree.root_node(), text_callback)
+                            .count() as u64;
                     });
                 }
 
