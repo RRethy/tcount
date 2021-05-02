@@ -19,7 +19,7 @@ fn run(cli: cli::Cli) -> Result<()> {
     let (file_counts, errors): (Vec<_>, Vec<_>) = cli
         .files
         .iter()
-        .map(|path| Counts::from_path(path, &cli.kind, &queries))
+        .map(|path| Counts::from_path(path, &cli.kinds, &cli.kind_patterns, &queries))
         .partition(Result::is_ok);
 
     if cli.show_files {

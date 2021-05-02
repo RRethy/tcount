@@ -1,3 +1,4 @@
+use regex::Regex;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -8,7 +9,10 @@ pub struct Cli {
     pub verbose: bool,
 
     #[structopt(short, long)]
-    pub kind: Vec<String>,
+    pub kinds: Vec<String>,
+
+    #[structopt(short = "p", long)]
+    pub kind_patterns: Vec<Regex>,
 
     #[structopt(long)]
     pub query_dir: Option<PathBuf>,

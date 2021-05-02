@@ -2,6 +2,7 @@ use crate::error::{Error, Result};
 use crate::language::Language;
 use crate::query::Queries;
 use crate::tree;
+use regex::Regex;
 use std::fs;
 use std::ops::AddAssign;
 use std::path::Path;
@@ -15,21 +16,21 @@ pub struct Counts {
     pub nfiles: u64,
     pub ntokens: u64,
     pub nkinds: Vec<u64>,
+    pub nkind_patterns: Vec<u64>,
     pub nqueries: Vec<u64>,
 }
 
 impl AddAssign for Counts {
     fn add_assign(&mut self, other: Self) {
+        #[inline(always)]
+        fn add(l: &mut Vec<u64>, r: &Vec<u64>) {
+            l.iter_mut().zip(r).for_each(|(a, b)| *a += b);
+        }
         self.nfiles += other.nfiles;
         self.ntokens += other.ntokens;
-        self.nkinds
-            .iter_mut()
-            .zip(&other.nkinds)
-            .for_each(|(a, b)| *a += b);
-        self.nqueries
-            .iter_mut()
-            .zip(&other.nqueries)
-            .for_each(|(a, b)| *a += b);
+        add(&mut self.nkinds, &other.nkinds);
+        add(&mut self.nkind_patterns, &other.nkind_patterns);
+        add(&mut self.nqueries, &other.nqueries);
     }
 }
 
@@ -37,6 +38,7 @@ impl Counts {
     pub fn from_path(
         path: impl AsRef<Path>,
         kinds: &Vec<String>,
+        kind_patterns: &Vec<Regex>,
         queries: &Queries,
     ) -> Result<(Language, Self)> {
         let lang = Language::from(path.as_ref());
@@ -50,6 +52,7 @@ impl Counts {
                             nfiles: 1,
                             ntokens: 0,
                             nkinds: Vec::new(),
+                            nkind_patterns: Vec::new(),
                             nqueries: Vec::new(),
                         },
                     ));
@@ -61,6 +64,7 @@ impl Counts {
             nfiles: 1,
             ntokens: 0,
             nkinds: vec![0; kinds.len()],
+            nkind_patterns: vec![0; kind_patterns.len()],
             nqueries: vec![0; queries.get(&lang).unwrap_or(&Vec::new()).len()],
         };
 
@@ -91,10 +95,16 @@ impl Counts {
                             counts.ntokens += 1;
                         }
 
-                        // count each --kind that matches the current nodes kind
+                        // count each --kinds that matches the current nodes kind
                         kinds.iter().enumerate().for_each(|(i, kind)| {
                             if kind == node.kind() {
                                 counts.nkinds[i] += 1;
+                            }
+                        });
+
+                        kind_patterns.iter().enumerate().for_each(|(i, kind)| {
+                            if kind.is_match(node.kind()) {
+                                counts.nkind_patterns[i] += 1;
                             }
                         });
                     }
