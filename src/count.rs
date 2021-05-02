@@ -3,6 +3,7 @@ use crate::language::Language;
 use crate::query::Queries;
 use crate::tree;
 use std::fs;
+use std::ops::AddAssign;
 use std::path::Path;
 use tree_sitter::{Node, Parser, QueryCursor};
 
@@ -11,37 +12,52 @@ use tree_sitter::{Node, Parser, QueryCursor};
 /// --query.
 #[derive(Debug)]
 pub struct Counts {
-    lang: Language,
-    nfiles: u64,
-    ntokens: u64,
-    nkinds: Vec<u64>,
-    nqueries: Vec<u64>,
+    pub nfiles: u64,
+    pub ntokens: u64,
+    pub nkinds: Vec<u64>,
+    pub nqueries: Vec<u64>,
+}
+
+impl AddAssign for Counts {
+    fn add_assign(&mut self, other: Self) {
+        self.nfiles += other.nfiles;
+        self.ntokens += other.ntokens;
+        self.nkinds
+            .iter_mut()
+            .zip(&other.nkinds)
+            .for_each(|(a, b)| *a += b);
+        self.nqueries
+            .iter_mut()
+            .zip(&other.nqueries)
+            .for_each(|(a, b)| *a += b);
+    }
 }
 
 impl Counts {
-    pub fn from_file(
+    pub fn from_path(
         path: impl AsRef<Path>,
         kinds: &Vec<String>,
         queries: &Queries,
-    ) -> Result<Self> {
+    ) -> Result<(Language, Self)> {
         let lang = Language::from(path.as_ref());
         let ts_lang = {
             match lang.get_treesitter_language() {
                 Ok(ts_lang) => ts_lang,
                 Err(_) => {
-                    return Ok(Counts {
-                        lang: Language::Unsupported,
-                        nfiles: 1,
-                        ntokens: 0,
-                        nkinds: Vec::new(),
-                        nqueries: Vec::new(),
-                    });
+                    return Ok((
+                        Language::Unsupported,
+                        Counts {
+                            nfiles: 1,
+                            ntokens: 0,
+                            nkinds: Vec::new(),
+                            nqueries: Vec::new(),
+                        },
+                    ));
                 }
             }
         };
 
         let mut counts = Counts {
-            lang: lang.clone(),
             nfiles: 1,
             ntokens: 0,
             nkinds: vec![0; kinds.len()],
@@ -83,7 +99,7 @@ impl Counts {
                         });
                     }
                 });
-                Ok(counts)
+                Ok((lang, counts))
             }
             None => Err(Error::Parser),
         }

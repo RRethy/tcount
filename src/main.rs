@@ -1,4 +1,4 @@
-// use std::collections::BTreeMap;
+use std::collections::BTreeMap;
 use std::process;
 use structopt::StructOpt;
 
@@ -11,23 +11,7 @@ mod tree;
 
 use count::Counts;
 use error::Result;
-// use language::Language;
 use query::get_queries;
-
-// fn group_by_language(counts: Vec<(Language, Vec<u64>)>) -> BTreeMap<Language, Vec<u64>> {
-//     counts
-//         .into_iter()
-//         .fold(BTreeMap::new(), |mut acc, (lang, counts)| {
-//             if let Some(cur) = acc.get_mut(&lang) {
-//                 cur.iter_mut()
-//                     .zip(&counts)
-//                     .for_each(|(cum, val)| *cum += val);
-//             } else {
-//                 acc.insert(lang, counts);
-//             }
-//             acc
-//         })
-// }
 
 fn run(cli: cli::Cli) -> Result<()> {
     let queries = get_queries(&cli.query_dir, &cli.query)?;
@@ -35,18 +19,21 @@ fn run(cli: cli::Cli) -> Result<()> {
     let (file_counts, errors): (Vec<_>, Vec<_>) = cli
         .files
         .iter()
-        .map(|path| Counts::from_file(path, &cli.kind, &queries))
+        .map(|path| Counts::from_path(path, &cli.kind, &queries))
         .partition(Result::is_ok);
 
-    // let (counts, errors) = get_counts(&cli.files, &cli.kind, &queries);
-    file_counts
-        .into_iter()
-        .map(Result::unwrap)
-        .for_each(|counts| println!("{:?}", counts));
-
-    // lang_counts
-    //     .iter()
-    //     .for_each(|(lang, count)| println!("{:?}: {:?}", lang, count));
+    let grouped_counts = file_counts.into_iter().map(Result::unwrap).fold(
+        BTreeMap::new(),
+        |mut acc, (lang, counts)| {
+            if let Some(cur) = acc.get_mut(&lang) {
+                *cur += counts;
+            } else {
+                acc.insert(lang, counts);
+            }
+            acc
+        },
+    );
+    println!("{:?}", grouped_counts);
 
     if cli.verbose {
         // TODO print this nicer
