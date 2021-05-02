@@ -14,7 +14,7 @@ use error::Result;
 use query::get_queries;
 
 fn run(cli: cli::Cli) -> Result<()> {
-    let queries = get_queries(&cli.query_dir, &cli.query)?;
+    let queries = get_queries(&cli.query_dir, &cli.queries)?;
 
     let (file_counts, errors): (Vec<_>, Vec<_>) = cli
         .files

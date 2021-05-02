@@ -5,19 +5,15 @@ use std::fs;
 use std::path::PathBuf;
 use tree_sitter::Query;
 
+// TODO these have to be named for printing later
 pub type Queries = HashMap<Language, Vec<Option<Query>>>;
 
-pub fn get_queries(query_dir: &Option<PathBuf>, queries: &Vec<String>) -> Result<Queries> {
+pub fn get_queries(query_dir: &PathBuf, queries: &Vec<String>) -> Result<Queries> {
     let mut langs = HashMap::new();
 
     if queries.len() == 0 {
         return Ok(langs.into());
     }
-
-    let query_dir = match query_dir {
-        Some(dir) => dir.clone(),
-        None => PathBuf::from("."),
-    };
 
     for path in fs::read_dir(query_dir)? {
         if let Ok(path) = path {
