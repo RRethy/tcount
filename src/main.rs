@@ -22,18 +22,22 @@ fn run(cli: cli::Cli) -> Result<()> {
         .map(|path| Counts::from_path(path, &cli.kind, &queries))
         .partition(Result::is_ok);
 
-    let grouped_counts = file_counts.into_iter().map(Result::unwrap).fold(
-        BTreeMap::new(),
-        |mut acc, (lang, counts)| {
-            if let Some(cur) = acc.get_mut(&lang) {
-                *cur += counts;
-            } else {
-                acc.insert(lang, counts);
-            }
-            acc
-        },
-    );
-    println!("{:?}", grouped_counts);
+    if cli.show_files {
+        println!("{:?}", file_counts);
+    } else {
+        let grouped_counts = file_counts.into_iter().map(Result::unwrap).fold(
+            BTreeMap::new(),
+            |mut acc, (lang, counts)| {
+                if let Some(cur) = acc.get_mut(&lang) {
+                    *cur += counts;
+                } else {
+                    acc.insert(lang, counts);
+                }
+                acc
+            },
+        );
+        println!("{:?}", grouped_counts);
+    }
 
     if cli.verbose {
         // TODO print this nicer

@@ -16,6 +16,9 @@ pub struct Cli {
     #[structopt(short, long)]
     pub query: Vec<String>,
 
+    #[structopt(long)]
+    pub show_files: bool,
+
     #[structopt()]
     pub files: Vec<PathBuf>,
 }
