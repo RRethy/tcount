@@ -57,27 +57,3 @@ fn main() {
         _ => {}
     }
 }
-
-#[cfg(test)]
-mod tests {
-    // use super::*;
-    // use crate::query::Queries;
-    // use std::collections::HashMap;
-    // use std::path::PathBuf;
-
-    // TODO move this to count.rs
-    // #[test]
-    // fn test_counting_rust() {
-    //     let files = vec![
-    //         PathBuf::from("./test_data/rust1.rs"),
-    //         PathBuf::from("./test_data/rust2.rs"),
-    //     ];
-    //     let mut expected = BTreeMap::new();
-    //     expected.insert(Language::Rust, vec![35 + 20, 4 + 0, 3 + 1]);
-    //     let kinds = vec!["\"".into(), ";".into()];
-    //     let queries = HashMap::new();
-    //     let (got, _) = get_counts(&files, &kinds, &queries);
-    //     let got = group_by_language(got);
-    //     assert_eq!(got, expected);
-    // }
-}

@@ -18,7 +18,7 @@ pub struct Cli {
     #[structopt(
         short,
         long,
-        help = "Kinds of node in the syntax tree to count. See node-types.json in the parsers repo."
+        help = "kinds of node in the syntax tree to count. See node-types.json in the parsers repo."
     )]
     pub kinds: Vec<String>,
 
@@ -39,7 +39,7 @@ pub struct Cli {
     #[structopt(
         short,
         long,
-        help = "Names of the tree-sitter queries found under {--queries-dir}/{language}/ to count.\n\nFor example, for a --queries-dir of `/foo/bar/` and a --queries of `foobar`, then /foo/bar/{language}/foobar.scm will be counted for all files of type {language}.\n\nSee https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries"
+        help = "Names of the tree-sitter queries found under {--queries-dir}/{language}/ to count.\n\nFor example, for a --queries-dir of `/foo/bar/` and a --queries of `foobar`, then /foo/bar/{language}/foobar.scm will be counted for all files of kind {language}.\n\nSee https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries"
     )]
     pub queries: Vec<String>,
 

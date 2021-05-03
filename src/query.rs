@@ -5,8 +5,7 @@ use std::fs;
 use std::path::PathBuf;
 use tree_sitter::Query;
 
-// TODO these have to be named for printing later
-pub type Queries = HashMap<Language, Vec<Query>>;
+pub type Queries = HashMap<Language, HashMap<String, Query>>;
 
 pub fn get_queries(query_dir: &PathBuf, queries: &Vec<String>) -> Result<Queries> {
     let mut langs = HashMap::new();
@@ -23,10 +22,10 @@ pub fn get_queries(query_dir: &PathBuf, queries: &Vec<String>) -> Result<Queries
                 for query in queries {
                     let path = path.join(format!("{}.scm", query));
                     if path.is_file() {
-                        langs
-                            .entry(lang.clone())
-                            .or_insert(Vec::new())
-                            .push(Query::new(ts_lang, fs::read_to_string(&path)?.as_ref())?);
+                        langs.entry(lang.clone()).or_insert(HashMap::new()).insert(
+                            query.into(),
+                            Query::new(ts_lang, fs::read_to_string(&path)?.as_ref())?,
+                        );
                     }
                 }
             }
