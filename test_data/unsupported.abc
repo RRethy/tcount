@@ -1,0 +1,2 @@
+pub fun inc(n) = n + 1
+pub fun dec(n) = n - 1

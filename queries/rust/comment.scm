@@ -1,4 +1,1 @@
-[
-    (line_comment)
-    (block_comment)
-]
+[ (line_comment) (block_comment) ]

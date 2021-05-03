@@ -11,7 +11,7 @@ use tree_sitter::{Node, Parser, QueryCursor};
 /// Counts contains the cumulative totals for the how many files, number of tokens, number of nodes
 /// matching each kind specified by --kind, and number of matches for each query specified by
 /// --query.
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Counts {
     pub nfiles: u64,
     pub ntokens: u64,
@@ -89,7 +89,7 @@ impl Counts {
                         // tokens. For some tokens this is a bit misleading since they can have
                         // children (e.g. string_literal in rust), but it's the closest we can
                         // acheive with tree-sitter.
-                        if node.child_count() == 0 && !node.is_extra() {
+                        if node.child_count() == 0 && !node.is_extra() && node.parent().is_some() {
                             counts.ntokens += 1;
                         }
 
@@ -111,5 +111,219 @@ impl Counts {
             }
             None => Err(Error::Parser),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashMap;
+
+    fn queries() -> Queries {
+        let mut map = HashMap::new();
+        let rust = Language::Rust;
+        let go = Language::Go;
+        map.insert(
+            rust.clone(),
+            vec![
+                tree_sitter::Query::new(
+                    rust.get_treesitter_language().unwrap(),
+                    "[(line_comment) (block_comment)]",
+                )
+                .unwrap(),
+                tree_sitter::Query::new(
+                    rust.get_treesitter_language().unwrap(),
+                    "[(string_literal) (raw_string_literal)]",
+                )
+                .unwrap(),
+            ],
+        );
+        map.insert(
+            go.clone(),
+            vec![
+                tree_sitter::Query::new(go.get_treesitter_language().unwrap(), "[(comment)]")
+                    .unwrap(),
+                tree_sitter::Query::new(
+                    go.get_treesitter_language().unwrap(),
+                    "[(interpreted_string_literal) (raw_string_literal)]",
+                )
+                .unwrap(),
+            ],
+        );
+        map
+    }
+
+    #[test]
+    fn counting_unsupported_language() {
+        let got = Counts::from_path(
+            "test_data/unsupported.abc",
+            &Vec::new(),
+            &Vec::new(),
+            &HashMap::new(),
+        );
+        let expected = (
+            Language::Unsupported,
+            Counts {
+                nfiles: 1,
+                ntokens: 0,
+                nkinds: Vec::new(),
+                nkind_patterns: Vec::new(),
+                nqueries: Vec::new(),
+            },
+        );
+        assert_eq!(expected, got.unwrap());
+    }
+
+    #[test]
+    fn counting_nothing() {
+        let got = Counts::from_path("test_data/empty.rs", &Vec::new(), &Vec::new(), &queries());
+        let expected = (
+            Language::Rust,
+            Counts {
+                nfiles: 1,
+                ntokens: 0,
+                nkinds: Vec::new(),
+                nkind_patterns: Vec::new(),
+                nqueries: vec![0, 0],
+            },
+        );
+        assert_eq!(expected, got.unwrap());
+    }
+
+    #[test]
+    fn counting_tokens() {
+        let got = Counts::from_path(
+            "test_data/rust1.rs",
+            &Vec::new(),
+            &Vec::new(),
+            &HashMap::new(),
+        );
+        let expected = (
+            Language::Rust,
+            Counts {
+                nfiles: 1,
+                ntokens: 33,
+                nkinds: Vec::new(),
+                nkind_patterns: Vec::new(),
+                nqueries: vec![],
+            },
+        );
+        assert_eq!(expected, got.unwrap());
+    }
+
+    #[test]
+    fn counting_tokens_for_invalid_syntax() {
+        let got = Counts::from_path(
+            "test_data/invalid.rs",
+            &Vec::new(),
+            &Vec::new(),
+            &HashMap::new(),
+        );
+        let expected = (
+            Language::Rust,
+            Counts {
+                nfiles: 1,
+                ntokens: 30,
+                nkinds: Vec::new(),
+                nkind_patterns: Vec::new(),
+                nqueries: vec![],
+            },
+        );
+        assert_eq!(expected, got.unwrap());
+    }
+
+    #[test]
+    fn counting_node_types() {
+        let got = Counts::from_path(
+            "test_data/rust1.rs",
+            &vec!["identifier".into(), "::".into()],
+            &Vec::new(),
+            &HashMap::new(),
+        );
+        let expected = (
+            Language::Rust,
+            Counts {
+                nfiles: 1,
+                ntokens: 33,
+                nkinds: vec![8, 3],
+                nkind_patterns: Vec::new(),
+                nqueries: vec![],
+            },
+        );
+        assert_eq!(expected, got.unwrap());
+    }
+
+    #[test]
+    fn counting_node_type_patterns() {
+        let got = Counts::from_path(
+            "test_data/rust1.rs",
+            &vec!["block_comment".into(), "line_comment".into()],
+            &vec![Regex::new(".*comment").unwrap()],
+            &HashMap::new(),
+        );
+        let expected = (
+            Language::Rust,
+            Counts {
+                nfiles: 1,
+                ntokens: 33,
+                nkinds: vec![1, 3],
+                nkind_patterns: vec![4],
+                nqueries: vec![],
+            },
+        );
+        assert_eq!(expected, got.unwrap());
+    }
+
+    #[test]
+    fn counting_queries() {
+        let got = Counts::from_path("test_data/rust1.rs", &Vec::new(), &Vec::new(), &queries());
+        let expected = (
+            Language::Rust,
+            Counts {
+                nfiles: 1,
+                ntokens: 33,
+                nkinds: Vec::new(),
+                nkind_patterns: Vec::new(),
+                nqueries: vec![4, 2],
+            },
+        );
+        assert_eq!(expected, got.unwrap());
+    }
+
+    #[test]
+    fn counting_queries_for_other_languages_are_not_used() {
+        let got = Counts::from_path("test_data/ruby.rb", &Vec::new(), &Vec::new(), &queries());
+        let expected = (
+            Language::Ruby,
+            Counts {
+                nfiles: 1,
+                ntokens: 10,
+                nkinds: Vec::new(),
+                nkind_patterns: Vec::new(),
+                nqueries: Vec::new(),
+            },
+        );
+        assert_eq!(expected, got.unwrap());
+    }
+
+    #[test]
+    fn counting_everything() {
+        let got = Counts::from_path(
+            "test_data/rust1.rs",
+            &vec!["block_comment".into(), "line_comment".into()],
+            &vec![Regex::new(".*comment").unwrap()],
+            &queries(),
+        );
+        let expected = (
+            Language::Rust,
+            Counts {
+                nfiles: 1,
+                ntokens: 33,
+                nkinds: vec![1, 3],
+                nkind_patterns: vec![4],
+                nqueries: vec![4, 2],
+            },
+        );
+        assert_eq!(expected, got.unwrap());
     }
 }
