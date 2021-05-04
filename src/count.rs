@@ -12,7 +12,6 @@ use tree_sitter::{Node, Parser, QueryCursor};
 /// Counts contains the cumulative totals for the how many files, number of tokens, number of nodes
 /// matching each kind specified by --kind, and number of matches for each query specified by
 /// --query.
-/// TODO change to &String
 #[derive(Debug, Eq, PartialEq)]
 pub struct Counts<'a> {
     pub nfiles: u64,
@@ -32,6 +31,7 @@ impl<'a> AddAssign for Counts<'a> {
         self.ntokens += other.ntokens;
         add(&mut self.nkinds, &other.nkinds);
         add(&mut self.nkind_patterns, &other.nkind_patterns);
+        // TODO sum the maps
         // add(&mut self.nqueries, &other.nqueries);
     }
 }
@@ -53,8 +53,8 @@ impl<'a> Counts<'a> {
                         Counts {
                             nfiles: 1,
                             ntokens: 0,
-                            nkinds: Vec::new(),
-                            nkind_patterns: Vec::new(),
+                            nkinds: vec![0; kinds.len()],
+                            nkind_patterns: vec![0; kind_patterns.len()],
                             nqueries: HashMap::new(),
                         },
                     ));

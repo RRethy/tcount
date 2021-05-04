@@ -2,6 +2,9 @@ use regex::Regex;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
+// TODO --show-totals
+// TODO --output=json,csv,table
+// TODO --order-by=language,files,tokens
 #[derive(StructOpt, Debug)]
 #[structopt(
     name = "tc",

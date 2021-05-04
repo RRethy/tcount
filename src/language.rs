@@ -35,6 +35,41 @@ pub enum Language {
     Unsupported,
 }
 
+impl ToString for Language {
+    fn to_string(&self) -> String {
+        match self {
+            Language::Bash => "Bash".into(),
+            Language::Bibtex => "BibTeX".into(),
+            Language::C => "C".into(),
+            Language::CSharp => "C#".into(),
+            Language::Clojure => "Clojure".into(),
+            Language::Cpp => "C++".into(),
+            Language::Css => "CSS".into(),
+            Language::Elm => "Elm".into(),
+            Language::EmbeddedTemplate => "Embedded Template".into(),
+            Language::Go => "Go".into(),
+            Language::Html => "HTML".into(),
+            Language::Java => "Java".into(),
+            Language::Javascript => "Javascript".into(),
+            Language::Json => "JSON".into(),
+            Language::Julia => "Julia".into(),
+            Language::Latex => "LaTeX".into(),
+            Language::Markdown => "Markdown".into(),
+            Language::Ocaml => "OCaml".into(),
+            Language::OcamlInterface => "OCaml Interface".into(),
+            Language::Python => "Python".into(),
+            Language::Query => "Tree-sitter Query".into(),
+            Language::Ruby => "Ruby".into(),
+            Language::Rust => "Rust".into(),
+            Language::Scala => "Scala".into(),
+            Language::Svelte => "Svelte".into(),
+            Language::Typescript => "Typescript".into(),
+            Language::Tsx => "TSX".into(),
+            Language::Unsupported => "Unsupported".into(),
+        }
+    }
+}
+
 impl Language {
     pub fn get_treesitter_language(&self) -> Result<tree_sitter::Language> {
         match self {

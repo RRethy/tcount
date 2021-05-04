@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::process;
 use structopt::StructOpt;
 
@@ -24,10 +24,10 @@ fn run(cli: cli::Cli) -> Result<()> {
         .partition(Result::is_ok);
 
     if cli.show_files {
-        print::grouped_by_file(&file_counts.into_iter().map(Result::unwrap).collect());
+        // print::grouped_by_file(&file_counts.into_iter().map(Result::unwrap).collect());
     } else {
         let grouped_counts = file_counts.into_iter().map(Result::unwrap).fold(
-            BTreeMap::new(),
+            HashMap::new(),
             |mut acc, (lang, counts)| {
                 if let Some(cur) = acc.get_mut(&lang) {
                     *cur += counts;
@@ -37,7 +37,12 @@ fn run(cli: cli::Cli) -> Result<()> {
                 acc
             },
         );
-        print::grouped_by_language(&grouped_counts);
+        print::grouped_by_language(
+            &grouped_counts,
+            &cli.kinds,
+            &cli.kind_patterns,
+            &cli.queries,
+        );
     }
 
     if cli.verbose {
