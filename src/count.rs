@@ -21,7 +21,6 @@ pub struct Counts<'a> {
     pub nqueries: HashMap<&'a String, u64>,
 }
 
-// TODO test this
 impl<'a> AddAssign for Counts<'a> {
     fn add_assign(&mut self, other: Self) {
         #[inline(always)]
@@ -345,5 +344,46 @@ mod tests {
             },
         );
         assert_eq!(expected, got.unwrap());
+    }
+
+    #[test]
+    fn add_counts() {
+        let foo = String::from("foo");
+        let bar = String::from("bar");
+        let baz = String::from("baz");
+        let mut c1 = Counts {
+            nfiles: 30,
+            ntokens: 21,
+            nkinds: vec![28, 28],
+            nkind_patterns: vec![29, 20, 2],
+            nqueries: hashmap! {
+                &baz => 55,
+                &bar => 44,
+            },
+        };
+        let c2 = Counts {
+            nfiles: 19,
+            ntokens: 31,
+            nkinds: vec![5, 9],
+            nkind_patterns: vec![6, 10, 14],
+            nqueries: hashmap! {
+                &foo => 33,
+                &bar => 44,
+            },
+        };
+
+        c1 += c2;
+        let expected = Counts {
+            nfiles: 49,
+            ntokens: 52,
+            nkinds: vec![33, 37],
+            nkind_patterns: vec![35, 30, 16],
+            nqueries: hashmap! {
+                &foo => 33,
+                &bar => 88,
+                &baz => 55,
+            },
+        };
+        assert_eq!(expected, c1);
     }
 }
