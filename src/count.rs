@@ -21,6 +21,7 @@ pub struct Counts<'a> {
     pub nqueries: HashMap<&'a String, u64>,
 }
 
+// TODO test this
 impl<'a> AddAssign for Counts<'a> {
     fn add_assign(&mut self, other: Self) {
         #[inline(always)]
@@ -31,8 +32,12 @@ impl<'a> AddAssign for Counts<'a> {
         self.ntokens += other.ntokens;
         add(&mut self.nkinds, &other.nkinds);
         add(&mut self.nkind_patterns, &other.nkind_patterns);
-        // TODO sum the maps
-        // add(&mut self.nqueries, &other.nqueries);
+        other.nqueries.iter().for_each(|(query, v1)| {
+            self.nqueries
+                .entry(query)
+                .and_modify(|v2| *v2 += v1)
+                .or_insert(*v1);
+        });
     }
 }
 

@@ -6,7 +6,7 @@ mod cli;
 mod count;
 mod error;
 mod language;
-mod print;
+mod output;
 mod query;
 mod tree;
 
@@ -37,7 +37,7 @@ fn run(cli: cli::Cli) -> Result<()> {
                 acc
             },
         );
-        print::grouped_by_language(
+        output::language_counts(
             &grouped_counts,
             &cli.kinds,
             &cli.kind_patterns,
