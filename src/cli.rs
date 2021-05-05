@@ -87,6 +87,9 @@ pub struct Cli {
     #[structopt(long, default_value = "table", help = "One of table|csv")]
     pub format: Format,
 
-    #[structopt(help = "Files to parse and count.")]
-    pub files: Vec<PathBuf>,
+    #[structopt(
+        default_value = ".",
+        help = "Files and directories to parse and count."
+    )]
+    pub paths: Vec<PathBuf>,
 }

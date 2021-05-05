@@ -11,6 +11,7 @@ pub enum Error {
     Parser,
     LanguageError(LanguageError),
     QueryError(QueryError),
+    Ignore(ignore::Error),
 }
 
 impl Display for Error {
@@ -21,6 +22,7 @@ impl Display for Error {
             Error::Parser => write!(f, "Parser Error\n"),
             Error::LanguageError(err) => write!(f, "Tree-sitter Language Error: {}\n", err),
             Error::QueryError(err) => write!(f, "Tree-sitter Query Error: {:?} \n", err),
+            Error::Ignore(err) => write!(f, "Error while walking filetree: {:?} \n", err),
         }
     }
 }
@@ -40,5 +42,11 @@ impl From<LanguageError> for Error {
 impl From<QueryError> for Error {
     fn from(err: QueryError) -> Error {
         Error::QueryError(err)
+    }
+}
+
+impl From<ignore::Error> for Error {
+    fn from(err: ignore::Error) -> Error {
+        Error::Ignore(err)
     }
 }
