@@ -13,6 +13,7 @@ mod tree;
 use cli::OrderBy;
 use count::Counts;
 use error::Result;
+use output::print;
 use query::get_queries;
 
 fn run(cli: cli::Cli) -> Result<()> {
@@ -51,7 +52,13 @@ fn run(cli: cli::Cli) -> Result<()> {
         OrderBy::NumFiles => c2.nfiles.cmp(&c1.nfiles),
         OrderBy::Tokens => c2.ntokens.cmp(&c1.ntokens),
     });
-    output::table(&counts, &cli.kinds, &cli.kind_patterns, &cli.queries);
+    print(
+        &cli.format,
+        &counts,
+        &cli.kinds,
+        &cli.kind_patterns,
+        &cli.queries,
+    );
 
     if cli.verbose {
         // TODO print this nicer

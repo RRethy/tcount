@@ -1,8 +1,26 @@
 use crate::count::Counts;
 use prettytable::{format, Cell, Row, Table};
 use regex::Regex;
-use std::fmt::Display;
 use std::format;
+use std::str::FromStr;
+
+#[derive(Debug)]
+pub enum Format {
+    Table,
+    CSV,
+}
+
+impl FromStr for Format {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "table" => Ok(Format::Table),
+            "csv" => Ok(Format::CSV),
+            _ => Err(format!("\"{}\" is not supported. Use one of table|csv", s)),
+        }
+    }
+}
 
 #[inline]
 fn title_cell(content: &str) -> Cell {
@@ -17,14 +35,15 @@ fn count_cell(count: u64) -> Cell {
     Cell::new(&count.to_string()).style_spec("r")
 }
 
-pub fn table(
-    counts: &Vec<(impl Display, Counts)>,
+pub fn print(
+    format: &Format,
+    counts: &Vec<(String, Counts)>,
     kinds: &Vec<String>,
     kind_patterns: &Vec<Regex>,
     queries: &Vec<String>,
 ) {
     let mut table = Table::new();
-    let format = format::FormatBuilder::new()
+    let tbl_format = format::FormatBuilder::new()
         .borders('│')
         .separators(
             &[format::LinePosition::Top],
@@ -40,7 +59,7 @@ pub fn table(
         )
         .padding(1, 1)
         .build();
-    table.set_format(format);
+    table.set_format(tbl_format);
 
     let mut titles = Vec::with_capacity(3 + kinds.len() + kind_patterns.len() + queries.len());
     titles.push(title_cell(""));
@@ -85,6 +104,13 @@ pub fn table(
         .for_each(|row| {
             table.add_row(Row::new(row));
         });
-
-    table.printstd();
+    match format {
+        Format::Table => {
+            table.printstd();
+        }
+        Format::CSV => match table.to_csv(std::io::stdout()) {
+            Ok(_) => {}
+            Err(err) => eprintln!("{}", err),
+        },
+    }
 }

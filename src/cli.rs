@@ -1,3 +1,4 @@
+use crate::output::Format;
 use regex::Regex;
 use std::format;
 use std::path::PathBuf;
@@ -16,24 +17,19 @@ impl FromStr for OrderBy {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s == "language" {
-            Ok(OrderBy::Language)
-        } else if s == "file" {
-            Ok(OrderBy::File)
-        } else if s == "numfiles" {
-            Ok(OrderBy::NumFiles)
-        } else if s == "tokens" {
-            Ok(OrderBy::Tokens)
-        } else {
-            Err(format!(
+        match s {
+            "language" => Ok(OrderBy::Language),
+            "file" => Ok(OrderBy::File),
+            "numfiles" => Ok(OrderBy::NumFiles),
+            "tokens" => Ok(OrderBy::Tokens),
+            _ => Err(format!(
                 "\"{}\" is not supported. Use one of language|file|numfiles|tokens",
                 s
-            ))
+            )),
         }
     }
 }
 
-// TODO --output=json,csv,table
 #[derive(StructOpt, Debug)]
 #[structopt(
     name = "tc",
@@ -83,6 +79,9 @@ pub struct Cli {
 
     #[structopt(long, default_value = "tokens", help = "TODO")]
     pub order_by: OrderBy,
+
+    #[structopt(long, default_value = "table", help = "TODO")]
+    pub format: Format,
 
     #[structopt(help = "Files to parse and count.")]
     pub files: Vec<PathBuf>,
