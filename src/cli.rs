@@ -77,10 +77,14 @@ pub struct Cli {
     )]
     pub show_files: bool,
 
-    #[structopt(long, default_value = "tokens", help = "TODO")]
+    #[structopt(
+        long,
+        default_value = "tokens",
+        help = "One of language|file|numfiles|tokens"
+    )]
     pub order_by: OrderBy,
 
-    #[structopt(long, default_value = "table", help = "TODO")]
+    #[structopt(long, default_value = "table", help = "One of table|csv")]
     pub format: Format,
 
     #[structopt(help = "Files to parse and count.")]
