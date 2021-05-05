@@ -1,7 +1,7 @@
 use crate::count::Counts;
-use crate::language::Language;
 use prettytable::{format, Cell, Row, Table};
 use regex::Regex;
+use std::fmt::Display;
 use std::format;
 
 #[inline]
@@ -18,7 +18,7 @@ fn count_cell(count: u64) -> Cell {
 }
 
 pub fn table(
-    counts: &Vec<(Language, Counts)>,
+    counts: &Vec<(impl Display, Counts)>,
     kinds: &Vec<String>,
     kind_patterns: &Vec<Regex>,
     queries: &Vec<String>,

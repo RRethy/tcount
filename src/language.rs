@@ -1,6 +1,7 @@
 use crate::error::{Error, Result};
 use std::cmp::{Eq, Ord, PartialEq, PartialOrd};
 use std::ffi::OsString;
+use std::fmt;
 use std::path::Path;
 
 #[derive(Clone, Debug, PartialOrd, PartialEq, Eq, Ord, Hash)]
@@ -35,38 +36,42 @@ pub enum Language {
     Unsupported,
 }
 
-impl ToString for Language {
-    fn to_string(&self) -> String {
-        match self {
-            Language::Bash => "Bash".into(),
-            Language::Bibtex => "BibTeX".into(),
-            Language::C => "C".into(),
-            Language::CSharp => "C#".into(),
-            Language::Clojure => "Clojure".into(),
-            Language::Cpp => "C++".into(),
-            Language::Css => "CSS".into(),
-            Language::Elm => "Elm".into(),
-            Language::EmbeddedTemplate => "Embedded Template".into(),
-            Language::Go => "Go".into(),
-            Language::Html => "HTML".into(),
-            Language::Java => "Java".into(),
-            Language::Javascript => "Javascript".into(),
-            Language::Json => "JSON".into(),
-            Language::Julia => "Julia".into(),
-            Language::Latex => "LaTeX".into(),
-            Language::Markdown => "Markdown".into(),
-            Language::Ocaml => "OCaml".into(),
-            Language::OcamlInterface => "OCaml Interface".into(),
-            Language::Python => "Python".into(),
-            Language::Query => "Tree-sitter Query".into(),
-            Language::Ruby => "Ruby".into(),
-            Language::Rust => "Rust".into(),
-            Language::Scala => "Scala".into(),
-            Language::Svelte => "Svelte".into(),
-            Language::Typescript => "Typescript".into(),
-            Language::Tsx => "TSX".into(),
-            Language::Unsupported => "Unsupported".into(),
-        }
+impl fmt::Display for Language {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Language::Bash => "Bash",
+                Language::Bibtex => "BibTeX",
+                Language::C => "C",
+                Language::CSharp => "C#",
+                Language::Clojure => "Clojure",
+                Language::Cpp => "C++",
+                Language::Css => "CSS",
+                Language::Elm => "Elm",
+                Language::EmbeddedTemplate => "Embedded Template",
+                Language::Go => "Go",
+                Language::Html => "HTML",
+                Language::Java => "Java",
+                Language::Javascript => "Javascript",
+                Language::Json => "JSON",
+                Language::Julia => "Julia",
+                Language::Latex => "LaTeX",
+                Language::Markdown => "Markdown",
+                Language::Ocaml => "OCaml",
+                Language::OcamlInterface => "OCaml Interface",
+                Language::Python => "Python",
+                Language::Query => "Tree-sitter Query",
+                Language::Ruby => "Ruby",
+                Language::Rust => "Rust",
+                Language::Scala => "Scala",
+                Language::Svelte => "Svelte",
+                Language::Typescript => "Typescript",
+                Language::Tsx => "TSX",
+                Language::Unsupported => "Unsupported",
+            }
+        )
     }
 }
 

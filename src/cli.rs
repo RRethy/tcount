@@ -33,7 +33,6 @@ impl FromStr for OrderBy {
     }
 }
 
-// TODO --show-totals
 // TODO --output=json,csv,table
 #[derive(StructOpt, Debug)]
 #[structopt(
