@@ -2,26 +2,23 @@ use crate::count::Counts;
 use crate::language::Language;
 use prettytable::{format, Cell, Row, Table};
 use regex::Regex;
-use std::collections::HashMap;
 use std::format;
 
 #[inline]
 fn title_cell(content: &str) -> Cell {
     Cell::new(content).style_spec("b")
 }
-
 #[inline]
 fn label_cell(label: &str) -> Cell {
     Cell::new(label).style_spec("li")
 }
-
 #[inline]
 fn count_cell(count: u64) -> Cell {
     Cell::new(&count.to_string()).style_spec("r")
 }
 
-pub fn language_counts(
-    counts: &HashMap<Language, Counts>,
+pub fn table(
+    counts: &Vec<(Language, Counts)>,
     kinds: &Vec<String>,
     kind_patterns: &Vec<Regex>,
     queries: &Vec<String>,
@@ -46,7 +43,7 @@ pub fn language_counts(
     table.set_format(format);
 
     let mut titles = Vec::with_capacity(3 + kinds.len() + kind_patterns.len() + queries.len());
-    titles.push(title_cell("Language"));
+    titles.push(title_cell(""));
     titles.push(title_cell("Files"));
     titles.push(title_cell("Tokens"));
     kinds
