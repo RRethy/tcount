@@ -49,13 +49,17 @@ fn run(cli: cli::Cli) -> Result<()> {
         OrderBy::Tokens => counts.sort_by(|(_l1, c1), (_l2, c2)| c2.ntokens.cmp(&c1.ntokens)),
     }
 
-    print(
-        &cli.format,
-        &counts,
-        &cli.kinds,
-        &cli.kind_patterns,
-        &cli.queries,
-    );
+    if counts.len() > 0 {
+        print(
+            &cli.format,
+            &counts,
+            &cli.kinds,
+            &cli.kind_patterns,
+            &cli.queries,
+        );
+    } else {
+        println!("No files found.");
+    }
 
     if cli.verbose {
         errors.into_iter().map(Result::unwrap_err).for_each(|err| {
