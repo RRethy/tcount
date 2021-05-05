@@ -15,7 +15,13 @@ pub enum Error {
 
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "TODO: Error")
+        match self {
+            Error::IO(err) => write!(f, "IO Error: {}\n", err),
+            Error::UnsupportedLanguage => write!(f, "Unsupported Language\n"),
+            Error::Parser => write!(f, "Parser Error\n"),
+            Error::LanguageError(err) => write!(f, "Tree-sitter Language Error: {}\n", err),
+            Error::QueryError(err) => write!(f, "Tree-sitter Query Error: {:?} \n", err),
+        }
     }
 }
 

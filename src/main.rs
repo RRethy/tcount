@@ -61,8 +61,9 @@ fn run(cli: cli::Cli) -> Result<()> {
     );
 
     if cli.verbose {
-        // TODO print this nicer
-        eprintln!("{:?}", errors);
+        errors.into_iter().map(Result::unwrap_err).for_each(|err| {
+            eprintln!("{}", err);
+        });
     }
     Ok(())
 }
