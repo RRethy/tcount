@@ -3,6 +3,7 @@ use crate::language::Language;
 use prettytable::{format, Cell, Row, Table};
 use regex::Regex;
 use std::collections::HashMap;
+use std::format;
 
 #[inline]
 fn title_cell(content: &str) -> Cell {
@@ -48,13 +49,15 @@ pub fn language_counts(
     titles.push(title_cell("Language"));
     titles.push(title_cell("Files"));
     titles.push(title_cell("Tokens"));
-    kinds.iter().for_each(|kind| titles.push(title_cell(kind)));
-    kind_patterns
+    kinds
         .iter()
-        .for_each(|kind_pat| titles.push(title_cell(&kind_pat.to_string())));
+        .for_each(|kind| titles.push(title_cell(&format!("Kind({})", kind))));
+    kind_patterns.iter().for_each(|kind_pat| {
+        titles.push(title_cell(&format!("Pattern({})", kind_pat.to_string())))
+    });
     queries
         .iter()
-        .for_each(|query| titles.push(title_cell(query).style_spec("b")));
+        .for_each(|query| titles.push(title_cell(&format!("Query({})", query)).style_spec("b")));
     table.set_titles(Row::new(titles));
 
     counts
