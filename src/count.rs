@@ -68,9 +68,11 @@ impl<'a> Counts<'a> {
         let mut nkind_patterns = vec![0; kind_patterns.len()];
         let mut nqueries = HashMap::new();
 
-        let text = fs::read_to_string(path)?;
+        let text = fs::read_to_string(path.as_ref())?;
         let mut parser = Parser::new();
-        parser.set_language(ts_lang)?;
+        parser
+            .set_language(ts_lang)
+            .expect("Internal Error setting parser language");
         let mut qcursor = QueryCursor::new();
         let text_callback = |n: Node| &text[n.byte_range()];
         match parser.parse(&text, None) {
@@ -96,13 +98,14 @@ impl<'a> Counts<'a> {
                             ntokens += 1;
                         }
 
-                        // count each --kinds that matches the current nodes kind
+                        // count each --kinds that matche the current nodes kind
                         kinds.iter().enumerate().for_each(|(i, kind)| {
                             if kind == node.kind() {
                                 nkinds[i] += 1;
                             }
                         });
 
+                        // count each --kind_patterns that match the current nodes kind
                         kind_patterns.iter().enumerate().for_each(|(i, kind)| {
                             if kind.is_match(node.kind()) {
                                 nkind_patterns[i] += 1;
@@ -118,7 +121,7 @@ impl<'a> Counts<'a> {
                     nqueries,
                 })
             }
-            None => Err(Error::Parser),
+            None => Err(Error::Parser(path.as_ref().to_path_buf())),
         }
     }
 }

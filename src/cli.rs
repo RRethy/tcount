@@ -37,11 +37,11 @@ impl FromStr for OrderBy {
 )]
 pub struct Cli {
     #[structopt(
-        short,
         long,
-        help = "Prints errors encountered (e.g. file reading, parsing, etc.)"
+        help = "Logging level. 0 to not print errors. 1 to print IO and filesystem errors. 2 to print parsing errors. 3 to print everything else.",
+        default_value = "0"
     )]
-    pub verbose: bool,
+    pub verbose: u8,
 
     #[structopt(
         short,

@@ -36,12 +36,10 @@ fn run(cli: cli::Cli) -> Result<()> {
         let path = res?;
         let lang = Language::from(path.as_ref());
         if lang_whitelist.len() == 0 || lang_whitelist.contains(&lang.to_string()) {
-            match Counts::from_path(&path, &lang, &cli.kinds, &cli.kind_patterns, &queries) {
-                Ok(counts) => Ok((lang, path, counts)),
-                Err(err) => Err(err),
-            }
+            let counts = Counts::from_path(&path, &lang, &cli.kinds, &cli.kind_patterns, &queries)?;
+            Ok((lang, path, counts))
         } else {
-            Err(Error::LanguageNotWhitelisted(lang))
+            Err(Error::LanguageNotWhitelisted(path, lang))
         }
     })
     .partition(Result::is_ok);
@@ -104,11 +102,13 @@ fn run(cli: cli::Cli) -> Result<()> {
         println!("No files found.");
     }
 
-    if cli.verbose {
-        errors.into_iter().map(Result::unwrap_err).for_each(|err| {
+    errors
+        .into_iter()
+        .map(Result::unwrap_err)
+        .filter(|err| err.should_show(cli.verbose))
+        .for_each(|err| {
             eprintln!("{}", err);
         });
-    }
     Ok(())
 }
 
@@ -120,7 +120,7 @@ fn main() {
     } else {
         match run(cli) {
             Err(err) => {
-                eprintln!("{:?}", err);
+                eprintln!("{}", err);
                 process::exit(1);
             }
             _ => {}
