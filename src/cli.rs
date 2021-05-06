@@ -99,8 +99,17 @@ pub struct Cli {
     #[structopt(long, help = "Count hidden files")]
     pub count_hidden: bool,
 
-    #[structopt(long, help = "Whitelist of languages to parse")]
+    #[structopt(
+        long,
+        help = "Whitelist of languages to parse. This overrides --language-blacklist."
+    )]
     pub language_whitelist: Vec<String>,
+
+    #[structopt(
+        long,
+        help = "Blacklist of languages not to parse. This is overriden by --language-whitelist."
+    )]
+    pub language_blacklist: Vec<String>,
 
     #[structopt(long, help = "Show a list of supported languages")]
     pub list_languages: bool,

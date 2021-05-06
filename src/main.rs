@@ -23,6 +23,9 @@ use query::get_queries;
 fn run(cli: cli::Cli) -> Result<()> {
     let lang_whitelist: HashSet<String> =
         HashSet::from_iter(cli.language_whitelist.iter().cloned());
+    let lang_blacklist: HashSet<String> =
+        HashSet::from_iter(cli.language_blacklist.iter().cloned());
+
     let queries = get_queries(&cli.queries_dir, &cli.queries)?;
 
     let (file_counts, errors): (Vec<_>, Vec<_>) = fs::iter_paths(
@@ -35,11 +38,17 @@ fn run(cli: cli::Cli) -> Result<()> {
     .map(|res| {
         let path = res?;
         let lang = Language::from(path.as_ref());
-        if lang_whitelist.len() == 0 || lang_whitelist.contains(&lang.to_string()) {
+        let ignore_path = if lang_whitelist.len() == 0 {
+            lang_blacklist.len() == 0 || !lang_blacklist.contains(&lang.to_string())
+        } else {
+            lang_whitelist.contains(&lang.to_string())
+        };
+
+        if ignore_path {
             let counts = Counts::from_path(&path, &lang, &cli.kinds, &cli.kind_patterns, &queries)?;
             Ok((lang, path, counts))
         } else {
-            Err(Error::LanguageNotWhitelisted(path, lang))
+            Err(Error::LanguageIgnored(path, lang))
         }
     })
     .partition(Result::is_ok);

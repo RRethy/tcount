@@ -13,7 +13,7 @@ pub enum Error {
     Parser(PathBuf),
     QueryError(QueryError),
     Ignore(ignore::Error),
-    LanguageNotWhitelisted(PathBuf, Language),
+    LanguageIgnored(PathBuf, Language),
 }
 
 impl Error {
@@ -24,7 +24,7 @@ impl Error {
             Error::Parser(_) => verbose_lvl >= 2,
             Error::QueryError(_) => true,
             Error::Ignore(_) => verbose_lvl >= 1,
-            Error::LanguageNotWhitelisted(_, _) => verbose_lvl >= 3,
+            Error::LanguageIgnored(_, _) => verbose_lvl >= 3,
         }
     }
 }
@@ -37,10 +37,10 @@ impl Display for Error {
             Error::Parser(path) => write!(f, "Parser Error for path {}\n", path.display()),
             Error::QueryError(err) => write!(f, "Tree-sitter Query Error: {:?}\n", err),
             Error::Ignore(err) => write!(f, "Error while walking filetree: {}\n", err),
-            Error::LanguageNotWhitelisted(path, lang) => {
+            Error::LanguageIgnored(path, lang) => {
                 write!(
                     f,
-                    "Language({}) for path({}) is not in the non-empty whitelist\n",
+                    "Language({}) for path({}) is ignored due to whitelist/blacklist options\n",
                     lang,
                     path.display()
                 )
