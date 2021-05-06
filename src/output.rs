@@ -37,7 +37,8 @@ fn count_cell(count: u64) -> Cell {
 
 pub fn print(
     format: &Format,
-    counts: &Vec<(String, Counts)>,
+    counts: Vec<(String, Counts)>,
+    totals: Option<Counts>,
     kinds: &Vec<String>,
     kind_patterns: &Vec<Regex>,
     queries: &Vec<String>,
@@ -78,12 +79,22 @@ pub fn print(
 
     counts
         .iter()
-        .map(|(lang, count)| {
+        .chain(
+            {
+                if let Some(totals) = totals {
+                    vec![(String::from("TOTALS"), totals)]
+                } else {
+                    vec![]
+                }
+            }
+            .iter(),
+        )
+        .map(|(label, count)| {
             let mut cols =
                 Vec::with_capacity(3 + kinds.len() + kind_patterns.len() + queries.len());
 
             // Language
-            cols.push(label_cell(&lang.to_string()));
+            cols.push(label_cell(&label.to_string()));
             // number of files
             cols.push(count_cell(count.nfiles));
             // number of tokens
@@ -104,6 +115,7 @@ pub fn print(
         .for_each(|row| {
             table.add_row(Row::new(row));
         });
+
     match format {
         Format::Table => {
             table.printstd();

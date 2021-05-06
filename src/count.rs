@@ -12,7 +12,7 @@ use tree_sitter::{Node, Parser, QueryCursor};
 /// Counts contains the cumulative totals for the how many files, number of tokens, number of nodes
 /// matching each kind specified by --kind, and number of matches for each query specified by
 /// --query.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Counts<'a> {
     pub nfiles: u64,
     pub ntokens: u64,

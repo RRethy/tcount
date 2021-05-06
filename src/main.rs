@@ -73,10 +73,29 @@ fn run(cli: cli::Cli) -> Result<()> {
         OrderBy::Tokens => counts.sort_by(|(_l1, c1), (_l2, c2)| c2.ntokens.cmp(&c1.ntokens)),
     }
 
+    let totals: Option<Counts> = if cli.hide_totals {
+        None
+    } else {
+        Some(counts.iter().fold(
+            Counts {
+                nfiles: 0,
+                ntokens: 0,
+                nkinds: vec![0; cli.kinds.len()],
+                nkind_patterns: vec![0; cli.kind_patterns.len()],
+                nqueries: HashMap::new(),
+            },
+            |mut cur, (_, counts)| {
+                cur += counts.clone();
+                cur
+            },
+        ))
+    };
+
     if counts.len() > 0 {
         print(
             &cli.format,
-            &counts,
+            counts,
+            totals,
             &cli.kinds,
             &cli.kind_patterns,
             &cli.queries,

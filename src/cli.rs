@@ -105,6 +105,9 @@ pub struct Cli {
     #[structopt(long, help = "Show a list of supported languages")]
     pub list_languages: bool,
 
+    #[structopt(long, help = "Hide count totals")]
+    pub hide_totals: bool,
+
     #[structopt(
         default_value = ".",
         help = "Files and directories to parse and count."
