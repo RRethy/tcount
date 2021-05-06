@@ -7,6 +7,8 @@ use tree_sitter::Query;
 
 pub type Queries = HashMap<Language, HashMap<String, Query>>;
 
+/// Reads the query files in @query_dir that match the names provided in @queries. Language is
+/// determined using the name of subdirectory based on the map in the language module.
 pub fn get_queries(query_dir: &PathBuf, queries: &Vec<String>) -> Result<Queries> {
     let mut langs = HashMap::new();
 

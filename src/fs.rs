@@ -2,6 +2,7 @@ use crate::error::Error;
 use rayon::prelude::*;
 use std::path::PathBuf;
 
+/// Recursively iterate over @paths and produce a parallel iterator over the files encountered.
 pub fn iter_paths<'a>(
     paths: &Vec<PathBuf>,
     no_git: bool,
@@ -13,10 +14,11 @@ pub fn iter_paths<'a>(
     &paths[1..].iter().for_each(|path| {
         builder.add(path);
     });
-    // We synchronously walk the filesystem and using rayon's .par_bridge to create a parallel
+    // We synchronously walk the filesystem and use rayon's .par_bridge to create a parallel
     // iterator over these results, this iterator the parses and counts each path. This is just as
-    // efficient as parallel walking of the filesystem and using some mechanism (like channels) to
-    // aggregate the results afterwards (which is how tokei works).
+    // efficient as parallel walking of the filesystem (with channels for inter-thread
+    // communication) since the limiting factor is the parsing of each file, not the walking of the
+    // filesystem.
     builder
         .git_exclude(!no_git)
         .git_global(!no_git)

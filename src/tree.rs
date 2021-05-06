@@ -1,11 +1,11 @@
 use tree_sitter::{Node, Tree};
 
+/// Pre-order traversal of the syntax tree that triggers @node_fn at each node
 pub fn traverse<CB>(tree: &Tree, mut node_fn: CB)
 where
     CB: FnMut(&Node),
 {
     let mut cursor = tree.walk();
-    // preoder traversal of the syntax tree
     'outer: loop {
         let node = cursor.node();
         node_fn(&node);

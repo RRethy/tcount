@@ -5,6 +5,9 @@ use std::ffi::OsString;
 use std::fmt;
 use std::path::Path;
 
+/// List of languages that are matched. Some of the languages are not supported since they either
+/// don't currently have a tree-sitter parser, or the tree-sitter parser is out-of-date and depends
+/// on an old version of the tree-sitter crate (<0.19.3).
 #[derive(Clone, Debug, PartialOrd, PartialEq, Eq, Ord, Hash)]
 pub enum Language {
     Bash,
@@ -259,6 +262,8 @@ static EXT_TO_LANGUAGE: phf::Map<&'static str, Language> = phf::phf_map! {
     "zig"     => Language::Zig,
 };
 
+/// These dir names are used when reading query files to know what language they refer to.
+/// See tc --help for more information on queries.
 static DIR_TO_LANGUAGE: phf::Map<&'static str, Language> = phf::phf_map! {
     "bash"             => Language::Bash,
     "bibtex"           => Language::BibTeX,

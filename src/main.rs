@@ -75,8 +75,11 @@ fn run(cli: cli::Cli) -> Result<()> {
             .collect()
     };
     match cli.order_by {
+        // sort asc lexographical order
         OrderBy::Language | OrderBy::File => counts.sort_by(|(l1, _c1), (l2, _c2)| l1.cmp(l2)),
+        // sort desc numerical order
         OrderBy::NumFiles => counts.sort_by(|(_l1, c1), (_l2, c2)| c2.nfiles.cmp(&c1.nfiles)),
+        // sort desc numerical order
         OrderBy::Tokens => counts.sort_by(|(_l1, c1), (_l2, c2)| c2.ntokens.cmp(&c1.ntokens)),
     }
 

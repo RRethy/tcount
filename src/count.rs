@@ -24,6 +24,7 @@ pub struct Counts<'a> {
 impl<'a> AddAssign for Counts<'a> {
     fn add_assign(&mut self, other: Self) {
         #[inline(always)]
+        // element-wise addition of two vectors
         fn add(l: &mut Vec<u64>, r: &Vec<u64>) {
             l.iter_mut().zip(r).for_each(|(a, b)| *a += b);
         }
@@ -52,6 +53,7 @@ impl<'a> Counts<'a> {
             match lang.get_treesitter_language() {
                 Ok(ts_lang) => ts_lang,
                 Err(_) => {
+                    // Unsupported language gets an 'empty' Counts struct
                     return Ok(Counts {
                         nfiles: 1,
                         ntokens: 0,
@@ -73,6 +75,7 @@ impl<'a> Counts<'a> {
         parser
             .set_language(ts_lang)
             .expect("Internal Error setting parser language");
+
         let mut qcursor = QueryCursor::new();
         let text_callback = |n: Node| &text[n.byte_range()];
         match parser.parse(&text, None) {
