@@ -1,4 +1,6 @@
-use std::collections::HashMap;
+use rayon::prelude::*;
+use std::collections::{HashMap, HashSet};
+use std::iter::FromIterator;
 use std::process;
 use structopt::StructOpt;
 
@@ -13,14 +15,36 @@ mod tree;
 
 use cli::OrderBy;
 use count::Counts;
-use error::Result;
+use error::{Error, Result};
 use language::Language;
 use output::print;
 use query::get_queries;
 
 fn run(cli: cli::Cli) -> Result<()> {
+    let lang_whitelist: HashSet<String> =
+        HashSet::from_iter(cli.language_whitelist.iter().cloned());
     let queries = get_queries(&cli.queries_dir, &cli.queries)?;
-    let (file_counts, errors): (Vec<_>, Vec<_>) = fs::walk_paths(&cli, &queries);
+
+    let (file_counts, errors): (Vec<_>, Vec<_>) = fs::iter_paths(
+        &cli.paths,
+        cli.no_git,
+        cli.count_hidden,
+        cli.no_dot_ignore,
+        cli.no_parent_ignore,
+    )
+    .map(|res| {
+        let path = res?;
+        let lang = Language::from(path.as_ref());
+        if lang_whitelist.len() == 0 || lang_whitelist.contains(&lang.to_string()) {
+            match Counts::from_path(&path, &lang, &cli.kinds, &cli.kind_patterns, &queries) {
+                Ok(counts) => Ok((lang, path, counts)),
+                Err(err) => Err(err),
+            }
+        } else {
+            Err(Error::LanguageNotWhitelisted(lang))
+        }
+    })
+    .partition(Result::is_ok);
 
     let mut counts: Vec<(String, Counts)> = if cli.show_files {
         file_counts

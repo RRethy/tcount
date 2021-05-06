@@ -1,3 +1,4 @@
+use crate::language::Language;
 use std::fmt::{self, Display};
 use std::io;
 use tree_sitter::{LanguageError, QueryError};
@@ -12,6 +13,7 @@ pub enum Error {
     LanguageError(LanguageError),
     QueryError(QueryError),
     Ignore(ignore::Error),
+    LanguageNotWhitelisted(Language),
 }
 
 impl Display for Error {
@@ -21,8 +23,11 @@ impl Display for Error {
             Error::UnsupportedLanguage => write!(f, "Unsupported Language\n"),
             Error::Parser => write!(f, "Parser Error\n"),
             Error::LanguageError(err) => write!(f, "Tree-sitter Language Error: {}\n", err),
-            Error::QueryError(err) => write!(f, "Tree-sitter Query Error: {:?} \n", err),
-            Error::Ignore(err) => write!(f, "Error while walking filetree: {:?} \n", err),
+            Error::QueryError(err) => write!(f, "Tree-sitter Query Error: {:?}\n", err),
+            Error::Ignore(err) => write!(f, "Error while walking filetree: {:?}\n", err),
+            Error::LanguageNotWhitelisted(lang) => {
+                write!(f, "Language({}) is not on the non-empty whitelist\n", lang)
+            }
         }
     }
 }

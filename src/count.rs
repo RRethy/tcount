@@ -43,25 +43,22 @@ impl<'a> AddAssign for Counts<'a> {
 impl<'a> Counts<'a> {
     pub fn from_path(
         path: impl AsRef<Path>,
+        lang: &Language,
         kinds: &Vec<String>,
         kind_patterns: &Vec<Regex>,
         queries: &'a Queries,
-    ) -> Result<(Language, Self)> {
-        let lang = Language::from(path.as_ref());
+    ) -> Result<Self> {
         let ts_lang = {
             match lang.get_treesitter_language() {
                 Ok(ts_lang) => ts_lang,
                 Err(_) => {
-                    return Ok((
-                        Language::Unsupported,
-                        Counts {
-                            nfiles: 1,
-                            ntokens: 0,
-                            nkinds: vec![0; kinds.len()],
-                            nkind_patterns: vec![0; kind_patterns.len()],
-                            nqueries: HashMap::new(),
-                        },
-                    ));
+                    return Ok(Counts {
+                        nfiles: 1,
+                        ntokens: 0,
+                        nkinds: vec![0; kinds.len()],
+                        nkind_patterns: vec![0; kind_patterns.len()],
+                        nqueries: HashMap::new(),
+                    });
                 }
             }
         };
@@ -113,16 +110,13 @@ impl<'a> Counts<'a> {
                         });
                     }
                 });
-                Ok((
-                    lang,
-                    Counts {
-                        nfiles: 1,
-                        ntokens,
-                        nkinds,
-                        nkind_patterns,
-                        nqueries,
-                    },
-                ))
+                Ok(Counts {
+                    nfiles: 1,
+                    ntokens,
+                    nkinds,
+                    nkind_patterns,
+                    nqueries,
+                })
             }
             None => Err(Error::Parser),
         }
@@ -172,73 +166,80 @@ mod tests {
         let queries = HashMap::new();
         let got = Counts::from_path(
             "test_data/unsupported.abc",
+            &Language::Unsupported,
             &Vec::new(),
             &Vec::new(),
             &queries,
         );
-        let expected = (
-            Language::Unsupported,
-            Counts {
-                nfiles: 1,
-                ntokens: 0,
-                nkinds: Vec::new(),
-                nkind_patterns: Vec::new(),
-                nqueries: HashMap::new(),
-            },
-        );
+        let expected = Counts {
+            nfiles: 1,
+            ntokens: 0,
+            nkinds: Vec::new(),
+            nkind_patterns: Vec::new(),
+            nqueries: HashMap::new(),
+        };
         assert_eq!(expected, got.unwrap());
     }
 
     #[test]
     fn counting_nothing() {
         let queries = queries();
-        let got = Counts::from_path("test_data/empty.rs", &Vec::new(), &Vec::new(), &queries);
+        let got = Counts::from_path(
+            "test_data/empty.rs",
+            &Language::Rust,
+            &Vec::new(),
+            &Vec::new(),
+            &queries,
+        );
         let comment = String::from("comment");
         let string_literal = String::from("string_literal");
-        let expected = (
-            Language::Rust,
-            Counts {
-                nfiles: 1,
-                ntokens: 0,
-                nkinds: Vec::new(),
-                nkind_patterns: Vec::new(),
-                nqueries: hashmap! {&comment => 0, &string_literal => 0},
-            },
-        );
+        let expected = Counts {
+            nfiles: 1,
+            ntokens: 0,
+            nkinds: Vec::new(),
+            nkind_patterns: Vec::new(),
+            nqueries: hashmap! {&comment => 0, &string_literal => 0},
+        };
         assert_eq!(expected, got.unwrap());
     }
 
     #[test]
     fn counting_tokens() {
         let queries = HashMap::new();
-        let got = Counts::from_path("test_data/rust1.rs", &Vec::new(), &Vec::new(), &queries);
-        let expected = (
-            Language::Rust,
-            Counts {
-                nfiles: 1,
-                ntokens: 33,
-                nkinds: Vec::new(),
-                nkind_patterns: Vec::new(),
-                nqueries: HashMap::new(),
-            },
+        let got = Counts::from_path(
+            "test_data/rust1.rs",
+            &Language::Rust,
+            &Vec::new(),
+            &Vec::new(),
+            &queries,
         );
+        let expected = Counts {
+            nfiles: 1,
+            ntokens: 33,
+            nkinds: Vec::new(),
+            nkind_patterns: Vec::new(),
+            nqueries: HashMap::new(),
+        };
         assert_eq!(expected, got.unwrap());
     }
 
     #[test]
     fn counting_tokens_for_invalid_syntax() {
         let queries = HashMap::new();
-        let got = Counts::from_path("test_data/invalid.rs", &Vec::new(), &Vec::new(), &queries);
-        let expected = (
-            Language::Rust,
-            Counts {
-                nfiles: 1,
-                ntokens: 30,
-                nkinds: Vec::new(),
-                nkind_patterns: Vec::new(),
-                nqueries: HashMap::new(),
-            },
+        let got = Counts::from_path(
+            "test_data/invalid.rs",
+            &Language::Rust,
+            &Vec::new(),
+            &Vec::new(),
+            &queries,
         );
+        let expected = Counts {
+            nfiles: 1,
+            ntokens: 30,
+            nkinds: Vec::new(),
+            nkind_patterns: Vec::new(),
+            nqueries: HashMap::new(),
+        };
         assert_eq!(expected, got.unwrap());
     }
 
@@ -247,20 +248,18 @@ mod tests {
         let queries = HashMap::new();
         let got = Counts::from_path(
             "test_data/rust1.rs",
+            &Language::Rust,
             &vec!["identifier".into(), "::".into()],
             &Vec::new(),
             &queries,
         );
-        let expected = (
-            Language::Rust,
-            Counts {
-                nfiles: 1,
-                ntokens: 33,
-                nkinds: vec![8, 3],
-                nkind_patterns: Vec::new(),
-                nqueries: HashMap::new(),
-            },
-        );
+        let expected = Counts {
+            nfiles: 1,
+            ntokens: 33,
+            nkinds: vec![8, 3],
+            nkind_patterns: Vec::new(),
+            nqueries: HashMap::new(),
+        };
         assert_eq!(expected, got.unwrap());
     }
 
@@ -269,56 +268,60 @@ mod tests {
         let queries = HashMap::new();
         let got = Counts::from_path(
             "test_data/rust1.rs",
+            &Language::Rust,
             &vec!["block_comment".into(), "line_comment".into()],
             &vec![Regex::new(".*comment").unwrap()],
             &queries,
         );
-        let expected = (
-            Language::Rust,
-            Counts {
-                nfiles: 1,
-                ntokens: 33,
-                nkinds: vec![1, 3],
-                nkind_patterns: vec![4],
-                nqueries: HashMap::new(),
-            },
-        );
+        let expected = Counts {
+            nfiles: 1,
+            ntokens: 33,
+            nkinds: vec![1, 3],
+            nkind_patterns: vec![4],
+            nqueries: HashMap::new(),
+        };
         assert_eq!(expected, got.unwrap());
     }
 
     #[test]
     fn counting_queries() {
         let queries = queries();
-        let got = Counts::from_path("test_data/rust1.rs", &Vec::new(), &Vec::new(), &queries);
+        let got = Counts::from_path(
+            "test_data/rust1.rs",
+            &Language::Rust,
+            &Vec::new(),
+            &Vec::new(),
+            &queries,
+        );
         let comment = String::from("comment");
         let string_literal = String::from("string_literal");
-        let expected = (
-            Language::Rust,
-            Counts {
-                nfiles: 1,
-                ntokens: 33,
-                nkinds: Vec::new(),
-                nkind_patterns: Vec::new(),
-                nqueries: hashmap! {&comment => 4, &string_literal => 2},
-            },
-        );
+        let expected = Counts {
+            nfiles: 1,
+            ntokens: 33,
+            nkinds: Vec::new(),
+            nkind_patterns: Vec::new(),
+            nqueries: hashmap! {&comment => 4, &string_literal => 2},
+        };
         assert_eq!(expected, got.unwrap());
     }
 
     #[test]
     fn counting_queries_for_other_languages_are_not_used() {
         let queries = queries();
-        let got = Counts::from_path("test_data/ruby.rb", &Vec::new(), &Vec::new(), &queries);
-        let expected = (
-            Language::Ruby,
-            Counts {
-                nfiles: 1,
-                ntokens: 10,
-                nkinds: Vec::new(),
-                nkind_patterns: Vec::new(),
-                nqueries: HashMap::new(),
-            },
+        let got = Counts::from_path(
+            "test_data/ruby.rb",
+            &Language::Ruby,
+            &Vec::new(),
+            &Vec::new(),
+            &queries,
         );
+        let expected = Counts {
+            nfiles: 1,
+            ntokens: 10,
+            nkinds: Vec::new(),
+            nkind_patterns: Vec::new(),
+            nqueries: HashMap::new(),
+        };
         assert_eq!(expected, got.unwrap());
     }
 
@@ -327,22 +330,20 @@ mod tests {
         let queries = queries();
         let got = Counts::from_path(
             "test_data/rust1.rs",
+            &Language::Rust,
             &vec!["block_comment".into(), "line_comment".into()],
             &vec![Regex::new(".*comment").unwrap()],
             &queries,
         );
         let comment = String::from("comment");
         let string_literal = String::from("string_literal");
-        let expected = (
-            Language::Rust,
-            Counts {
-                nfiles: 1,
-                ntokens: 33,
-                nkinds: vec![1, 3],
-                nkind_patterns: vec![4],
-                nqueries: hashmap! {&comment => 4, &string_literal => 2},
-            },
-        );
+        let expected = Counts {
+            nfiles: 1,
+            ntokens: 33,
+            nkinds: vec![1, 3],
+            nkind_patterns: vec![4],
+            nqueries: hashmap! {&comment => 4, &string_literal => 2},
+        };
         assert_eq!(expected, got.unwrap());
     }
 

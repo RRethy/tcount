@@ -1,22 +1,14 @@
-use crate::cli::Cli;
-use crate::count::Counts;
-use crate::error::Result;
-use crate::language::Language;
-use crate::query::Queries;
+use crate::error::Error;
 use rayon::prelude::*;
 use std::path::PathBuf;
 
-pub fn walk_paths<'a>(
-    cli: &Cli,
-    queries: &'a Queries,
-) -> (
-    Vec<Result<(Language, PathBuf, Counts<'a>)>>,
-    Vec<Result<(Language, PathBuf, Counts<'a>)>>,
-) {
-    let paths = &cli.paths;
-    let kinds = &cli.kinds;
-    let kind_patterns = &cli.kind_patterns;
-
+pub fn iter_paths<'a>(
+    paths: &Vec<PathBuf>,
+    no_git: bool,
+    count_hidden: bool,
+    no_dot_ignore: bool,
+    no_parent_ignore: bool,
+) -> impl ParallelIterator<Item = Result<PathBuf, Error>> {
     let mut builder = ignore::WalkBuilder::new(paths.first().unwrap());
     &paths[1..].iter().for_each(|path| {
         builder.add(path);
@@ -26,33 +18,23 @@ pub fn walk_paths<'a>(
     // efficient as parallel walking of the filesystem and using some mechanism (like channels) to
     // aggregate the results afterwards (which is how tokei works).
     builder
-        .git_exclude(!cli.no_git)
-        .git_global(!cli.no_git)
-        .git_ignore(!cli.no_git)
-        .hidden(!cli.count_hidden)
-        .ignore(!cli.no_dot_ignore)
-        .parents(!cli.no_parent_ignore)
+        .git_exclude(!no_git)
+        .git_global(!no_git)
+        .git_ignore(!no_git)
+        .hidden(!count_hidden)
+        .ignore(!no_dot_ignore)
+        .parents(!no_parent_ignore)
         .build()
         .into_iter()
         .par_bridge()
-        .filter_map(|entry| {
-            let res = match entry {
-                Ok(dir) => {
-                    if dir.file_type().map_or(false, |ft| ft.is_file()) {
-                        let path = dir.into_path();
-                        Some(
-                            match Counts::from_path(&path, &kinds, &kind_patterns, &queries) {
-                                Ok((lang, counts)) => Ok((lang, path, counts)),
-                                Err(err) => Err(err),
-                            },
-                        )
-                    } else {
-                        None
-                    }
+        .filter_map(|entry| match entry {
+            Ok(dir) => {
+                if dir.file_type().map_or(false, |ft| ft.is_file()) {
+                    Some(Ok(dir.into_path()))
+                } else {
+                    None
                 }
-                Err(err) => Some(Err(err.into())),
-            };
-            res
+            }
+            Err(err) => Some(Err(Error::from(err))),
         })
-        .partition(Result::is_ok)
 }
