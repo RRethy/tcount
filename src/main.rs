@@ -14,6 +14,7 @@ mod tree;
 use cli::OrderBy;
 use count::Counts;
 use error::Result;
+use language::Language;
 use output::print;
 use query::get_queries;
 
@@ -70,11 +71,16 @@ fn run(cli: cli::Cli) -> Result<()> {
 
 fn main() {
     let cli = cli::Cli::from_args();
-    match run(cli) {
-        Err(err) => {
-            eprintln!("{:?}", err);
-            process::exit(1);
+
+    if cli.list_languages {
+        println!("{}", Language::list_all());
+    } else {
+        match run(cli) {
+            Err(err) => {
+                eprintln!("{:?}", err);
+                process::exit(1);
+            }
+            _ => {}
         }
-        _ => {}
     }
 }

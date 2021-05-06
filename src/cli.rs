@@ -99,6 +99,12 @@ pub struct Cli {
     #[structopt(long, help = "Count hidden files")]
     pub count_hidden: bool,
 
+    #[structopt(long, help = "Whitelist of languages to parse")]
+    pub language_whitelist: Vec<String>,
+
+    #[structopt(long, help = "Show a list of supported languages")]
+    pub list_languages: bool,
+
     #[structopt(
         default_value = ".",
         help = "Files and directories to parse and count."

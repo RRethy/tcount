@@ -1,5 +1,6 @@
 use crate::error::{Error, Result};
 use std::cmp::{Eq, Ord, PartialEq, PartialOrd};
+use std::collections::HashMap;
 use std::ffi::OsString;
 use std::fmt;
 use std::path::Path;
@@ -34,6 +35,27 @@ pub enum Language {
     Typescript,
     Tsx,
     Unsupported,
+}
+
+impl Language {
+    pub fn list_all() -> String {
+        let mut langs: Vec<(&Language, Vec<String>)> = EXT_TO_LANGUAGE
+            .into_iter()
+            .fold(HashMap::new(), |mut acc, (ext, lang)| {
+                acc.entry(lang)
+                    .or_insert(Vec::new())
+                    .push(format!(".{}", ext));
+                acc
+            })
+            .into_iter()
+            .collect();
+        langs.sort_by(|(l1, _), (l2, _)| l1.cmp(&l2));
+        langs
+            .into_iter()
+            .map(|(lang, exts)| format!("{} ({})", lang, exts.join(",")))
+            .collect::<Vec<String>>()
+            .join("\n")
+    }
 }
 
 impl fmt::Display for Language {
