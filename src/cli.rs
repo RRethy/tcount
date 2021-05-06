@@ -87,6 +87,18 @@ pub struct Cli {
     #[structopt(long, default_value = "table", help = "One of table|csv")]
     pub format: Format,
 
+    #[structopt(long, help = "Don't respect gitignore and .git/info/exclude files")]
+    pub no_git: bool,
+
+    #[structopt(long, help = "Don't respect .ignore files")]
+    pub no_dot_ignore: bool,
+
+    #[structopt(long, help = "Don't respect ignore files from parent directories")]
+    pub no_parent_ignore: bool,
+
+    #[structopt(long, help = "Count hidden files")]
+    pub count_hidden: bool,
+
     #[structopt(
         default_value = ".",
         help = "Files and directories to parse and count."

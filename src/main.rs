@@ -19,8 +19,7 @@ use query::get_queries;
 
 fn run(cli: cli::Cli) -> Result<()> {
     let queries = get_queries(&cli.queries_dir, &cli.queries)?;
-    let (file_counts, errors): (Vec<_>, Vec<_>) =
-        fs::walk_paths(&cli.paths, &cli.kinds, &cli.kind_patterns, &queries);
+    let (file_counts, errors): (Vec<_>, Vec<_>) = fs::walk_paths(&cli, &queries);
 
     let mut counts: Vec<(String, Counts)> = if cli.show_files {
         file_counts

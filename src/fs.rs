@@ -1,28 +1,37 @@
+use crate::cli::Cli;
 use crate::count::Counts;
 use crate::error::Result;
 use crate::language::Language;
 use crate::query::Queries;
 use rayon::prelude::*;
-use regex::Regex;
 use std::path::PathBuf;
 
 pub fn walk_paths<'a>(
-    paths: &Vec<PathBuf>,
-    kinds: &Vec<String>,
-    kind_patterns: &Vec<Regex>,
+    cli: &Cli,
     queries: &'a Queries,
 ) -> (
     Vec<Result<(Language, PathBuf, Counts<'a>)>>,
     Vec<Result<(Language, PathBuf, Counts<'a>)>>,
 ) {
+    let paths = &cli.paths;
+    let kinds = &cli.kinds;
+    let kind_patterns = &cli.kind_patterns;
+
     let mut builder = ignore::WalkBuilder::new(paths.first().unwrap());
     &paths[1..].iter().for_each(|path| {
         builder.add(path);
     });
-    // Synchronously walking the filesystem and using rayon's .par_bridge to create a parallel
-    // iterator and collect the results outperforms using ignore::WalkBuilder::build_parallel to
-    // walk the file system asynchronously then using channels to collect the results.
+    // We synchronously walk the filesystem and using rayon's .par_bridge to create a parallel
+    // iterator over these results, this iterator the parses and counts each path. This is just as
+    // efficient as parallel walking of the filesystem and using some mechanism (like channels) to
+    // aggregate the results afterwards (which is how tokei works).
     builder
+        .git_exclude(!cli.no_git)
+        .git_global(!cli.no_git)
+        .git_ignore(!cli.no_git)
+        .hidden(!cli.count_hidden)
+        .ignore(!cli.no_dot_ignore)
+        .parents(!cli.no_parent_ignore)
         .build()
         .into_iter()
         .par_bridge()
