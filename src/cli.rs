@@ -1,4 +1,5 @@
 use crate::output::Format;
+use crate::query::Query;
 use regex::Regex;
 use std::format;
 use std::path::PathBuf;
@@ -70,6 +71,9 @@ pub struct Cli {
         help = "Names of the tree-sitter queries found under {--queries-dir}/{language}/ to count.\n\nFor example, for a --queries-dir of `/foo/bar/` and a --queries of `foobar`, then /foo/bar/{language}/foobar.scm will be counted for all files of kind {language}.\n\nSee https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries"
     )]
     pub queries: Vec<String>,
+
+    #[structopt(long)]
+    pub xqueries: Vec<Query>,
 
     #[structopt(
         long,
