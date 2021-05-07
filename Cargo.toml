@@ -25,7 +25,7 @@ tree-sitter-cpp = "0.19.0"
 tree-sitter-css = { git = "https://github.com/tree-sitter/tree-sitter-css", version = "0.19.0" }
 # tree-sitter-dart = { git = "https://github.com/RRethy/tree-sitter-dart", version = "*" }
 tree-sitter-elm = "5.3.3"
-tree-sitter-erlang = { git = "https://github.com/RRethy/tree-sitter-erlang", version = "*", branch = "main" }
+tree-sitter-erlang = { git = "https://github.com/AbstractMachinesLab/tree-sitter-erlang", version = "0.0.1", branch = "main" }
 tree-sitter-embedded-template = "0.19.0"
 # tree-sitter-fennel = { git = "https://github.com/RRethy/tree-sitter-fennel", version = "0.0.1" }
 # tree-sitter-gdscript = { git = "https://github.com/PrestonKnopp/tree-sitter-gdscript", version = "*" }
