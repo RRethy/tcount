@@ -1,1 +1,1 @@
-(comment) @pwd.test
+(comment) @xdg.test

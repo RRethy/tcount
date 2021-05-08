@@ -41,6 +41,14 @@ impl FromStr for Query {
     /// that match $XDG_CONFIG_HOME/tc/* (conflicting query files result in undefined behaviour),
     /// lastly the builtin queries directory is searched.
     fn from_str(name: &str) -> std::result::Result<Self, Self::Err> {
+        let (kind, name) = match name.find('@') {
+            Some(i) => (
+                QueryKind::Captures(name[i + 1..].split(',').map(String::from).collect()),
+                &name[..i],
+            ),
+            None => (QueryKind::Match, name),
+        };
+
         let queries: Option<HashMap<Language, tree_sitter::Query>> = vec![
             // look in pwd for a .tc_queries/ dir
             format!(".tc_queries/*/{}.scm", name),
@@ -73,6 +81,7 @@ impl FromStr for Query {
                     let tree_sitter_lang = lang.get_treesitter_language()?;
                     let query_str = fs::read_to_string(&path)?;
                     let query = tree_sitter::Query::new(tree_sitter_lang, &query_str)?;
+                    // TODO disable any groups that don't contain the capture
                     Ok((lang, query))
                 })
                 .filter_map(Result::ok)
@@ -82,18 +91,11 @@ impl FromStr for Query {
         .next();
 
         if let Some(queries) = queries {
-            match name.find('@') {
-                Some(i) => Ok(Query {
-                    name: name[..i].to_string(),
-                    kind: QueryKind::Captures(name[i + 1..].split(',').map(String::from).collect()),
-                    langs: queries,
-                }),
-                None => Ok(Query {
-                    name: name.to_string(),
-                    kind: QueryKind::Match,
-                    langs: queries,
-                }),
-            }
+            Ok(Query {
+                name: name.to_string(),
+                kind,
+                langs: queries,
+            })
         } else {
             Err(String::from("TODO"))
         }
@@ -126,15 +128,15 @@ mod tests {
         assert_eq!("_test", query.name);
         assert_eq!(QueryKind::Match, query.kind);
         assert_eq!(
-            ["pwd.test"],
+            ["pwd.test", "pwd.test2"],
             query.langs.get(&Language::Go).unwrap().capture_names()
         );
         assert_eq!(
-            ["pwd.test"],
+            ["pwd.test", "pwd.test2"],
             query.langs.get(&Language::Ruby).unwrap().capture_names()
         );
         assert_eq!(
-            ["pwd.test"],
+            ["pwd.test", "pwd.test2"],
             query.langs.get(&Language::Rust).unwrap().capture_names()
         );
     }
@@ -175,6 +177,52 @@ mod tests {
         );
         assert_eq!(
             ["manifest.false"],
+            query.langs.get(&Language::Rust).unwrap().capture_names()
+        );
+    }
+
+    #[test]
+    fn test_single_capture_syntax() {
+        setup();
+        let query = Query::from_str("_test@pwd.test").unwrap();
+        assert_eq!("_test", query.name);
+        assert_eq!(
+            QueryKind::Captures(vec!["pwd.test".to_string()]),
+            query.kind
+        );
+        assert_eq!(
+            ["pwd.test", "pwd.test2"],
+            query.langs.get(&Language::Go).unwrap().capture_names()
+        );
+        assert_eq!(
+            ["pwd.test", "pwd.test2"],
+            query.langs.get(&Language::Ruby).unwrap().capture_names()
+        );
+        assert_eq!(
+            ["pwd.test", "pwd.test2"],
+            query.langs.get(&Language::Rust).unwrap().capture_names()
+        );
+    }
+
+    #[test]
+    fn test_multi_capture_syntax() {
+        setup();
+        let query = Query::from_str("_test@pwd.test,pwd.test2").unwrap();
+        assert_eq!("_test", query.name);
+        assert_eq!(
+            QueryKind::Captures(vec!["pwd.test".to_string(), "pwd.test2".to_string()]),
+            query.kind
+        );
+        assert_eq!(
+            ["pwd.test", "pwd.test2"],
+            query.langs.get(&Language::Go).unwrap().capture_names()
+        );
+        assert_eq!(
+            ["pwd.test", "pwd.test2"],
+            query.langs.get(&Language::Ruby).unwrap().capture_names()
+        );
+        assert_eq!(
+            ["pwd.test", "pwd.test2"],
             query.langs.get(&Language::Rust).unwrap().capture_names()
         );
     }
