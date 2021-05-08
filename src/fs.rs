@@ -15,10 +15,9 @@ pub fn iter_paths<'a>(
         builder.add(path);
     });
     // We synchronously walk the filesystem and use rayon's .par_bridge to create a parallel
-    // iterator over these results, this iterator the parses and counts each path. This is just as
-    // efficient as parallel walking of the filesystem (with channels for inter-thread
-    // communication) since the limiting factor is the parsing of each file, not the walking of the
-    // filesystem.
+    // iterator over these results for processing. This is just as efficient (and sometimes more
+    // so) as asynchronously walking the filesystem (with channels for inter-thread communication)
+    // since the limiting factor is the parsing of each file, not the walking of the filesystem.
     builder
         .git_exclude(!no_git)
         .git_global(!no_git)

@@ -18,15 +18,12 @@ use count::Counts;
 use error::{Error, Result};
 use language::Language;
 use output::print;
-use query::get_queries;
 
 fn run(cli: cli::Cli) -> Result<()> {
     let lang_whitelist: HashSet<String> =
         HashSet::from_iter(cli.language_whitelist.iter().cloned());
     let lang_blacklist: HashSet<String> =
         HashSet::from_iter(cli.language_blacklist.iter().cloned());
-
-    let queries = get_queries(&cli.queries_dir, &cli.queries)?;
 
     let (file_counts, errors): (Vec<_>, Vec<_>) = fs::iter_paths(
         &cli.paths,
@@ -45,7 +42,8 @@ fn run(cli: cli::Cli) -> Result<()> {
         };
 
         if ignore_path {
-            let counts = Counts::from_path(&path, &lang, &cli.kinds, &cli.kind_patterns, &queries)?;
+            let counts =
+                Counts::from_path(&path, &lang, &cli.kinds, &cli.kind_patterns, &cli.query)?;
             Ok((lang, path, counts))
         } else {
             Err(Error::LanguageIgnored(path, lang))
@@ -108,7 +106,7 @@ fn run(cli: cli::Cli) -> Result<()> {
             totals,
             &cli.kinds,
             &cli.kind_patterns,
-            &cli.queries,
+            &cli.query,
         );
     } else {
         println!("No files found.");
@@ -140,10 +138,10 @@ fn main() {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    #[test]
-    fn foo() {}
-}
+//     #[test]
+//     fn foo() {}
+// }

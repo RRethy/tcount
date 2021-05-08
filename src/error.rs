@@ -1,4 +1,5 @@
 use crate::language::Language;
+use glob::GlobError;
 use std::fmt::{self, Display};
 use std::io;
 use std::path::PathBuf;
@@ -14,6 +15,7 @@ pub enum Error {
     QueryError(QueryError),
     Ignore(ignore::Error),
     LanguageIgnored(PathBuf, Language),
+    Glob(GlobError),
 }
 
 impl Error {
@@ -25,6 +27,7 @@ impl Error {
             Error::QueryError(_) => true,
             Error::Ignore(_) => verbose_lvl >= 1,
             Error::LanguageIgnored(_, _) => verbose_lvl >= 3,
+            Error::Glob(_) => verbose_lvl >= 3,
         }
     }
 }
@@ -45,6 +48,7 @@ impl Display for Error {
                     path.display()
                 )
             }
+            Error::Glob(err) => write!(f, "Error with globbing {}\n", err),
         }
     }
 }
@@ -64,5 +68,11 @@ impl From<QueryError> for Error {
 impl From<ignore::Error> for Error {
     fn from(err: ignore::Error) -> Error {
         Error::Ignore(err)
+    }
+}
+
+impl From<GlobError> for Error {
+    fn from(err: GlobError) -> Error {
+        Error::Glob(err)
     }
 }

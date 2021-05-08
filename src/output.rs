@@ -1,4 +1,5 @@
 use crate::count::Counts;
+use crate::query::Query;
 use prettytable::{format, Cell, Row, Table};
 use regex::Regex;
 use std::format;
@@ -41,7 +42,7 @@ pub fn print(
     totals: Option<Counts>,
     kinds: &Vec<String>,
     kind_patterns: &Vec<Regex>,
-    queries: &Vec<String>,
+    queries: &Vec<Query>,
 ) {
     let mut table = Table::new();
     let tbl_format = format::FormatBuilder::new()
@@ -72,9 +73,9 @@ pub fn print(
     kind_patterns.iter().for_each(|kind_pat| {
         titles.push(title_cell(&format!("Pattern({})", kind_pat.to_string())))
     });
-    queries
-        .iter()
-        .for_each(|query| titles.push(title_cell(&format!("Query({})", query)).style_spec("b")));
+    queries.iter().for_each(|query| {
+        titles.push(title_cell(&format!("Query({})", query.name)).style_spec("b"))
+    });
     table.set_titles(Row::new(titles));
 
     counts
@@ -107,9 +108,9 @@ pub fn print(
                 .iter()
                 .for_each(|n| cols.push(count_cell(*n)));
             // number of nodes for a specific query
-            queries
-                .iter()
-                .for_each(|query| cols.push(count_cell(*count.nqueries.get(query).unwrap_or(&0))));
+            queries.iter().for_each(|query| {
+                cols.push(count_cell(*count.nqueries.get(&query.name).unwrap_or(&0)))
+            });
             cols
         })
         .for_each(|row| {

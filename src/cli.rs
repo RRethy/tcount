@@ -6,31 +6,6 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use structopt::StructOpt;
 
-#[derive(Debug)]
-pub enum OrderBy {
-    Language,
-    File,
-    NumFiles,
-    Tokens,
-}
-
-impl FromStr for OrderBy {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "language" => Ok(OrderBy::Language),
-            "file" => Ok(OrderBy::File),
-            "numfiles" => Ok(OrderBy::NumFiles),
-            "tokens" => Ok(OrderBy::Tokens),
-            _ => Err(format!(
-                "\"{}\" is not supported. Use one of language|file|numfiles|tokens",
-                s
-            )),
-        }
-    }
-}
-
 #[derive(StructOpt, Debug)]
 #[structopt(
     name = "tc",
@@ -65,15 +40,14 @@ pub struct Cli {
     )]
     pub queries_dir: PathBuf,
 
-    #[structopt(
-        short,
-        long,
-        help = "Names of the tree-sitter queries found under {--queries-dir}/{language}/ to count.\n\nFor example, for a --queries-dir of `/foo/bar/` and a --queries of `foobar`, then /foo/bar/{language}/foobar.scm will be counted for all files of kind {language}.\n\nSee https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries"
-    )]
-    pub queries: Vec<String>,
-
-    #[structopt(long)]
-    pub xqueries: Vec<Query>,
+    // #[structopt(
+    //     short,
+    //     long,
+    //     help = "Names of the tree-sitter queries found under {--queries-dir}/{language}/ to count.\n\nFor example, for a --queries-dir of `/foo/bar/` and a --queries of `foobar`, then /foo/bar/{language}/foobar.scm will be counted for all files of kind {language}.\n\nSee https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries"
+    // )]
+    // pub queries: Vec<String>,
+    #[structopt(long, help = "TODO")]
+    pub query: Vec<Query>,
 
     #[structopt(
         long,
@@ -126,4 +100,29 @@ pub struct Cli {
         help = "Files and directories to parse and count."
     )]
     pub paths: Vec<PathBuf>,
+}
+
+#[derive(Debug)]
+pub enum OrderBy {
+    Language,
+    File,
+    NumFiles,
+    Tokens,
+}
+
+impl FromStr for OrderBy {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "language" => Ok(OrderBy::Language),
+            "file" => Ok(OrderBy::File),
+            "numfiles" => Ok(OrderBy::NumFiles),
+            "tokens" => Ok(OrderBy::Tokens),
+            _ => Err(format!(
+                "\"{}\" is not supported. Use one of language|file|numfiles|tokens",
+                s
+            )),
+        }
+    }
 }

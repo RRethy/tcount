@@ -1,6 +1,6 @@
 use crate::error::{Error, Result};
 use crate::language::Language;
-use crate::query::Queries;
+use crate::query::Query;
 use crate::tree;
 use regex::Regex;
 use std::collections::HashMap;
@@ -47,7 +47,7 @@ impl<'a> Counts<'a> {
         lang: &Language,
         kinds: &Vec<String>,
         kind_patterns: &Vec<Regex>,
-        queries: &'a Queries,
+        queries: &'a Vec<Query>,
     ) -> Result<Self> {
         let ts_lang = {
             match lang.get_treesitter_language() {
@@ -74,22 +74,32 @@ impl<'a> Counts<'a> {
         let mut parser = Parser::new();
         parser
             .set_language(ts_lang)
-            .expect("Internal Error setting parser language");
+            .expect("Unexpected internal error setting parser language");
 
         let mut qcursor = QueryCursor::new();
         let text_callback = |n: Node| &text[n.byte_range()];
         match parser.parse(&text, None) {
             Some(tree) => {
-                if let Some(queries) = queries.get(&lang) {
-                    queries.iter().for_each(|(name, query)| {
+                queries.iter().for_each(|query| {
+                    if let Some(ts_query) = query.langs.get(lang) {
                         nqueries.insert(
-                            name,
+                            &query.name,
                             qcursor
-                                .matches(query, tree.root_node(), text_callback)
+                                .matches(ts_query, tree.root_node(), text_callback)
                                 .count() as u64,
                         );
-                    });
-                }
+                    }
+                });
+                // if let Some(queries) = queries.get(&lang) {
+                //     queries.iter().for_each(|(name, query)| {
+                //         nqueries.insert(
+                //             name,
+                //             qcursor
+                //                 .matches(query, tree.root_node(), text_callback)
+                //                 .count() as u64,
+                //         );
+                //     });
+                // }
 
                 tree::traverse(&tree, |node| {
                     if !node.is_missing() {
@@ -132,44 +142,40 @@ impl<'a> Counts<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::query::QueryKind;
     use maplit::hashmap;
     use std::collections::HashMap;
 
-    fn queries() -> Queries {
-        let mut map = HashMap::new();
+    fn queries() -> Vec<Query> {
         let rust = Language::Rust;
+        let ts_rust = rust.get_treesitter_language().unwrap();
         let go = Language::Go;
-        map.insert(
-            rust.clone(),
-            hashmap! {
-                "comment".into() => tree_sitter::Query::new(
-                        rust.get_treesitter_language().unwrap(),
-                        "[(line_comment) (block_comment)]",
-                    )
-                    .unwrap(),
-                "string_literal".into() => tree_sitter::Query::new(
-                    rust.get_treesitter_language().unwrap(),
-                    "[(string_literal) (raw_string_literal)]",
-                )
-                .unwrap(),
+        let ts_go = go.get_treesitter_language().unwrap();
+        let comment_query_rust =
+            tree_sitter::Query::new(ts_rust, "[(line_comment) (block_comment)]").unwrap();
+        let string_query_rust =
+            tree_sitter::Query::new(ts_rust, "[(string_literal) (raw_string_literal)]").unwrap();
+        let string_query_go =
+            tree_sitter::Query::new(ts_go, "[(interpreted_string_literal) (raw_string_literal)]")
+                .unwrap();
+
+        vec![
+            Query {
+                name: String::from("comment"),
+                kind: QueryKind::Match,
+                langs: hashmap! { rust.clone() => comment_query_rust },
             },
-        );
-        map.insert(
-            go.clone(),
-            hashmap! {
-                    "string_literal".into() => tree_sitter::Query::new(
-                        go.get_treesitter_language().unwrap(),
-                        "[(interpreted_string_literal) (raw_string_literal)]",
-                    )
-                    .unwrap(),
+            Query {
+                name: String::from("string_literal"),
+                kind: QueryKind::Match,
+                langs: hashmap! { rust.clone() => string_query_rust, go => string_query_go },
             },
-        );
-        map
+        ]
     }
 
     #[test]
     fn counting_unsupported_language() {
-        let queries = HashMap::new();
+        let queries = Vec::new();
         let got = Counts::from_path(
             "test_data/unsupported.abc",
             &Language::Unsupported,
@@ -211,7 +217,7 @@ mod tests {
 
     #[test]
     fn counting_tokens() {
-        let queries = HashMap::new();
+        let queries = Vec::new();
         let got = Counts::from_path(
             "test_data/rust1.rs",
             &Language::Rust,
@@ -231,7 +237,7 @@ mod tests {
 
     #[test]
     fn counting_tokens_for_invalid_syntax() {
-        let queries = HashMap::new();
+        let queries = Vec::new();
         let got = Counts::from_path(
             "test_data/invalid.rs",
             &Language::Rust,
@@ -251,7 +257,7 @@ mod tests {
 
     #[test]
     fn counting_node_kinds() {
-        let queries = HashMap::new();
+        let queries = Vec::new();
         let got = Counts::from_path(
             "test_data/rust1.rs",
             &Language::Rust,
@@ -271,7 +277,7 @@ mod tests {
 
     #[test]
     fn counting_node_kind_patterns() {
-        let queries = HashMap::new();
+        let queries = Vec::new();
         let got = Counts::from_path(
             "test_data/rust1.rs",
             &Language::Rust,
