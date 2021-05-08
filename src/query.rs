@@ -80,8 +80,23 @@ impl FromStr for Query {
                     let lang = Language::from(path.parent().unwrap_or(&PathBuf::new()));
                     let tree_sitter_lang = lang.get_treesitter_language()?;
                     let query_str = fs::read_to_string(&path)?;
-                    let query = tree_sitter::Query::new(tree_sitter_lang, &query_str)?;
-                    // TODO disable any groups that don't contain the capture
+                    let mut query = tree_sitter::Query::new(tree_sitter_lang, &query_str)?;
+                    match &kind {
+                        // this logic isn't tested since afaik there is no way to check disabled
+                        // captures (Query::capture_names returns disabled captures unfortunately)
+                        QueryKind::Captures(captures) => {
+                            let unused_captures: Vec<String> = query
+                                .capture_names()
+                                .iter()
+                                .filter(|name| !captures.contains(name))
+                                .map(String::clone)
+                                .collect();
+                            unused_captures
+                                .iter()
+                                .for_each(|name| query.disable_capture(name));
+                        }
+                        _ => {}
+                    }
                     Ok((lang, query))
                 })
                 .filter_map(Result::ok)
@@ -97,7 +112,7 @@ impl FromStr for Query {
                 langs: queries,
             })
         } else {
-            Err(String::from("TODO"))
+            Err(format!("Unabled to find query for {}", name))
         }
     }
 }
@@ -125,6 +140,7 @@ mod tests {
     fn test_query_in_pwd() {
         setup();
         let query = Query::from_str("_test").unwrap();
+        println!("{:?}", query);
         assert_eq!("_test", query.name);
         assert_eq!(QueryKind::Match, query.kind);
         assert_eq!(
@@ -145,6 +161,7 @@ mod tests {
     fn test_query_in_xdg_config_home() {
         setup();
         let query = Query::from_str("string").unwrap();
+        println!("{:?}", query);
         assert_eq!("string", query.name);
         assert_eq!(QueryKind::Match, query.kind);
         assert_eq!(
@@ -165,6 +182,7 @@ mod tests {
     fn test_query_in_manifest_dir() {
         setup();
         let query = Query::from_str("false").unwrap();
+        println!("{:?}", query);
         assert_eq!("false", query.name);
         assert_eq!(QueryKind::Match, query.kind);
         assert_eq!(
@@ -185,6 +203,7 @@ mod tests {
     fn test_single_capture_syntax() {
         setup();
         let query = Query::from_str("_test@pwd.test").unwrap();
+        println!("{:?}", query);
         assert_eq!("_test", query.name);
         assert_eq!(
             QueryKind::Captures(vec!["pwd.test".to_string()]),
@@ -208,6 +227,7 @@ mod tests {
     fn test_multi_capture_syntax() {
         setup();
         let query = Query::from_str("_test@pwd.test,pwd.test2").unwrap();
+        println!("{:?}", query);
         assert_eq!("_test", query.name);
         assert_eq!(
             QueryKind::Captures(vec!["pwd.test".to_string(), "pwd.test2".to_string()]),
