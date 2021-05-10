@@ -33,13 +33,6 @@ pub struct Cli {
     )]
     pub kind_patterns: Vec<Regex>,
 
-    #[structopt(
-        long,
-        default_value = "queries",
-        help = "The directory too look for the named queries provided by --queries."
-    )]
-    pub queries_dir: PathBuf,
-
     // #[structopt(
     //     short,
     //     long,

@@ -85,13 +85,7 @@ fn run(cli: cli::Cli) -> Result<()> {
         None
     } else {
         Some(counts.iter().fold(
-            Counts {
-                nfiles: 0,
-                ntokens: 0,
-                nkinds: vec![0; cli.kinds.len()],
-                nkind_patterns: vec![0; cli.kind_patterns.len()],
-                nqueries: Vec::new(),
-            },
+            Counts::empty(cli.kinds.len(), cli.kind_patterns.len(), &cli.query),
             |mut cur, (_, counts)| {
                 cur += counts.clone();
                 cur

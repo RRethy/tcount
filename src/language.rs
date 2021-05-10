@@ -92,7 +92,7 @@ impl fmt::Display for Language {
             match self {
                 Language::Bash => "Bash",
                 Language::BibTeX => "BibTeX",
-                Language::C => "C =>",
+                Language::C => "C",
                 Language::CSharp => "C#",
                 Language::Clojure => "Clojure",
                 Language::Cpp => "C++",
@@ -122,7 +122,7 @@ impl fmt::Display for Language {
                 Language::PHP => "PHP",
                 Language::Python => "Python",
                 Language::Query => "Tree-sitter Query",
-                Language::R => "R =>",
+                Language::R => "R",
                 Language::RST => "RST",
                 Language::Ruby => "Ruby",
                 Language::Rust => "Rust",

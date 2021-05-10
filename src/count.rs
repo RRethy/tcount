@@ -21,6 +21,38 @@ pub struct Counts {
     pub nqueries: Vec<u64>,
 }
 
+impl Counts {
+    pub fn empty(nkinds: usize, nkind_patterns: usize, queries: &Vec<Query>) -> Counts {
+        Counts {
+            nfiles: 0,
+            ntokens: 0,
+            nkinds: vec![0; nkinds],
+            nkind_patterns: vec![0; nkind_patterns],
+            nqueries: Self::nqueries(&queries, HashMap::new(), HashMap::new()),
+        }
+    }
+
+    fn nqueries(
+        queries: &Vec<Query>,
+        nmatches: HashMap<&String, u64>,
+        ncaptures: HashMap<(&String, &String), u64>,
+    ) -> Vec<u64> {
+        queries
+            .iter()
+            .flat_map(|query| match query.kind {
+                QueryKind::Match => {
+                    vec![nmatches.get(&query.name).unwrap_or(&0)]
+                }
+                QueryKind::Captures(ref names) => names
+                    .iter()
+                    .map(|name| ncaptures.get(&(&query.name, name)).unwrap_or(&0))
+                    .collect(),
+            })
+            .map(|n| n.clone())
+            .collect()
+    }
+}
+
 impl AddAssign for Counts {
     fn add_assign(&mut self, other: Self) {
         #[inline(always)]
@@ -34,26 +66,6 @@ impl AddAssign for Counts {
         add(&mut self.nkind_patterns, &other.nkind_patterns);
         add(&mut self.nqueries, &other.nqueries);
     }
-}
-
-fn query_counts_from(
-    queries: &Vec<Query>,
-    nmatches: HashMap<&String, u64>,
-    ncaptures: HashMap<(&String, &String), u64>,
-) -> Vec<u64> {
-    queries
-        .iter()
-        .flat_map(|query| match query.kind {
-            QueryKind::Match => {
-                vec![nmatches.get(&query.name).unwrap_or(&0)]
-            }
-            QueryKind::Captures(ref names) => names
-                .iter()
-                .map(|name| ncaptures.get(&(&query.name, name)).unwrap_or(&0))
-                .collect(),
-        })
-        .map(|n| n.clone())
-        .collect()
 }
 
 impl Counts {
@@ -71,10 +83,7 @@ impl Counts {
                     // Unsupported language gets an *empty* Counts struct
                     return Ok(Counts {
                         nfiles: 1,
-                        ntokens: 0,
-                        nkinds: vec![0; kinds.len()],
-                        nkind_patterns: vec![0; kind_patterns.len()],
-                        nqueries: query_counts_from(queries, HashMap::new(), HashMap::new()),
+                        ..Counts::empty(kinds.len(), kind_patterns.len(), queries)
                     });
                 }
             }
@@ -151,7 +160,7 @@ impl Counts {
                         });
                     }
                 });
-                let nqueries = query_counts_from(queries, nmatch_queries, ncapture_queries);
+                let nqueries = Counts::nqueries(queries, nmatch_queries, ncapture_queries);
                 Ok(Counts {
                     nfiles: 1,
                     ntokens,
@@ -357,7 +366,7 @@ mod tests {
         nmatches.insert(&string_literal, 7);
         let mut ncaptures = HashMap::new();
         ncaptures.insert((&keyword, &ifelse), 3);
-        let got = query_counts_from(&queries, nmatches, ncaptures);
+        let got = Counts::nqueries(&queries, nmatches, ncaptures);
         assert_eq!(vec![5, 3, 0, 7], got);
     }
 
