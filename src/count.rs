@@ -1,6 +1,6 @@
 use crate::error::{Error, Result};
 use crate::language::Language;
-use crate::query::Query;
+use crate::query::{Query, QueryKind};
 use crate::tree;
 use regex::Regex;
 use std::collections::HashMap;
@@ -13,18 +13,18 @@ use tree_sitter::{Node, Parser, QueryCursor};
 /// matching each kind specified by --kind, and number of matches for each query specified by
 /// --query.
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub struct Counts<'a> {
+pub struct Counts {
     pub nfiles: u64,
     pub ntokens: u64,
     pub nkinds: Vec<u64>,
     pub nkind_patterns: Vec<u64>,
-    pub nqueries: HashMap<&'a String, u64>,
+    pub nqueries: Vec<u64>,
 }
 
-impl<'a> AddAssign for Counts<'a> {
+impl AddAssign for Counts {
     fn add_assign(&mut self, other: Self) {
         #[inline(always)]
-        // element-wise addition of two vectors
+        // element-wise addition of two equal-sized vectors
         fn add(l: &mut Vec<u64>, r: &Vec<u64>) {
             l.iter_mut().zip(r).for_each(|(a, b)| *a += b);
         }
@@ -32,34 +32,49 @@ impl<'a> AddAssign for Counts<'a> {
         self.ntokens += other.ntokens;
         add(&mut self.nkinds, &other.nkinds);
         add(&mut self.nkind_patterns, &other.nkind_patterns);
-        other.nqueries.iter().for_each(|(query, v1)| {
-            self.nqueries
-                .entry(query)
-                .and_modify(|v2| *v2 += v1)
-                .or_insert(*v1);
-        });
+        add(&mut self.nqueries, &other.nqueries);
     }
 }
 
-impl<'a> Counts<'a> {
+fn query_counts_from(
+    queries: &Vec<Query>,
+    nmatches: HashMap<&String, u64>,
+    ncaptures: HashMap<(&String, &String), u64>,
+) -> Vec<u64> {
+    queries
+        .iter()
+        .flat_map(|query| match query.kind {
+            QueryKind::Match => {
+                vec![nmatches.get(&query.name).unwrap_or(&0)]
+            }
+            QueryKind::Captures(ref names) => names
+                .iter()
+                .map(|name| ncaptures.get(&(&query.name, name)).unwrap_or(&0))
+                .collect(),
+        })
+        .map(|n| n.clone())
+        .collect()
+}
+
+impl Counts {
     pub fn from_path(
         path: impl AsRef<Path>,
         lang: &Language,
         kinds: &Vec<String>,
         kind_patterns: &Vec<Regex>,
-        queries: &'a Vec<Query>,
+        queries: &Vec<Query>,
     ) -> Result<Self> {
         let ts_lang = {
             match lang.get_treesitter_language() {
                 Ok(ts_lang) => ts_lang,
                 Err(_) => {
-                    // Unsupported language gets an 'empty' Counts struct
+                    // Unsupported language gets an *empty* Counts struct
                     return Ok(Counts {
                         nfiles: 1,
                         ntokens: 0,
                         nkinds: vec![0; kinds.len()],
                         nkind_patterns: vec![0; kind_patterns.len()],
-                        nqueries: HashMap::new(),
+                        nqueries: query_counts_from(queries, HashMap::new(), HashMap::new()),
                     });
                 }
             }
@@ -68,7 +83,8 @@ impl<'a> Counts<'a> {
         let mut ntokens = 0;
         let mut nkinds = vec![0; kinds.len()];
         let mut nkind_patterns = vec![0; kind_patterns.len()];
-        let mut nqueries = HashMap::new();
+        let mut nmatch_queries = HashMap::new();
+        let mut ncapture_queries = HashMap::new();
 
         let text = fs::read_to_string(path.as_ref())?;
         let mut parser = Parser::new();
@@ -82,24 +98,33 @@ impl<'a> Counts<'a> {
             Some(tree) => {
                 queries.iter().for_each(|query| {
                     if let Some(ts_query) = query.langs.get(lang) {
-                        nqueries.insert(
-                            &query.name,
-                            qcursor
-                                .matches(ts_query, tree.root_node(), text_callback)
-                                .count() as u64,
-                        );
+                        match &query.kind {
+                            QueryKind::Match => {
+                                nmatch_queries.insert(
+                                    &query.name,
+                                    qcursor
+                                        .matches(ts_query, tree.root_node(), text_callback)
+                                        .count() as u64,
+                                );
+                            }
+                            QueryKind::Captures(_) => {
+                                let capture_names = ts_query.capture_names();
+                                qcursor
+                                    .captures(ts_query, tree.root_node(), text_callback)
+                                    .for_each(|(qmatch, _)| {
+                                        qmatch.captures.iter().for_each(|capture| {
+                                            *ncapture_queries
+                                                .entry((
+                                                    &query.name,
+                                                    &capture_names[capture.index as usize],
+                                                ))
+                                                .or_insert(0) += 1;
+                                        });
+                                    });
+                            }
+                        }
                     }
                 });
-                // if let Some(queries) = queries.get(&lang) {
-                //     queries.iter().for_each(|(name, query)| {
-                //         nqueries.insert(
-                //             name,
-                //             qcursor
-                //                 .matches(query, tree.root_node(), text_callback)
-                //                 .count() as u64,
-                //         );
-                //     });
-                // }
 
                 tree::traverse(&tree, |node| {
                     if !node.is_missing() {
@@ -126,6 +151,7 @@ impl<'a> Counts<'a> {
                         });
                     }
                 });
+                let nqueries = query_counts_from(queries, nmatch_queries, ncapture_queries);
                 Ok(Counts {
                     nfiles: 1,
                     ntokens,
@@ -144,7 +170,6 @@ mod tests {
     use super::*;
     use crate::query::QueryKind;
     use maplit::hashmap;
-    use std::collections::HashMap;
 
     fn queries() -> Vec<Query> {
         let rust = Language::Rust;
@@ -188,7 +213,7 @@ mod tests {
             ntokens: 0,
             nkinds: Vec::new(),
             nkind_patterns: Vec::new(),
-            nqueries: HashMap::new(),
+            nqueries: Vec::new(),
         };
         assert_eq!(expected, got.unwrap());
     }
@@ -210,7 +235,7 @@ mod tests {
             ntokens: 0,
             nkinds: Vec::new(),
             nkind_patterns: Vec::new(),
-            nqueries: hashmap! {&comment => 0, &string_literal => 0},
+            nqueries: vec![0, 0],
         };
         assert_eq!(expected, got.unwrap());
     }
@@ -230,7 +255,7 @@ mod tests {
             ntokens: 33,
             nkinds: Vec::new(),
             nkind_patterns: Vec::new(),
-            nqueries: HashMap::new(),
+            nqueries: Vec::new(),
         };
         assert_eq!(expected, got.unwrap());
     }
@@ -250,7 +275,7 @@ mod tests {
             ntokens: 30,
             nkinds: Vec::new(),
             nkind_patterns: Vec::new(),
-            nqueries: HashMap::new(),
+            nqueries: Vec::new(),
         };
         assert_eq!(expected, got.unwrap());
     }
@@ -270,7 +295,7 @@ mod tests {
             ntokens: 33,
             nkinds: vec![8, 3],
             nkind_patterns: Vec::new(),
-            nqueries: HashMap::new(),
+            nqueries: Vec::new(),
         };
         assert_eq!(expected, got.unwrap());
     }
@@ -290,7 +315,7 @@ mod tests {
             ntokens: 33,
             nkinds: vec![1, 3],
             nkind_patterns: vec![4],
-            nqueries: HashMap::new(),
+            nqueries: Vec::new(),
         };
         assert_eq!(expected, got.unwrap());
     }
@@ -312,7 +337,7 @@ mod tests {
             ntokens: 33,
             nkinds: Vec::new(),
             nkind_patterns: Vec::new(),
-            nqueries: hashmap! {&comment => 4, &string_literal => 2},
+            nqueries: vec![4, 2],
         };
         assert_eq!(expected, got.unwrap());
     }
@@ -332,7 +357,7 @@ mod tests {
             ntokens: 10,
             nkinds: Vec::new(),
             nkind_patterns: Vec::new(),
-            nqueries: HashMap::new(),
+            nqueries: Vec::new(),
         };
         assert_eq!(expected, got.unwrap());
     }
@@ -354,7 +379,7 @@ mod tests {
             ntokens: 33,
             nkinds: vec![1, 3],
             nkind_patterns: vec![4],
-            nqueries: hashmap! {&comment => 4, &string_literal => 2},
+            nqueries: vec![4, 2],
         };
         assert_eq!(expected, got.unwrap());
     }
@@ -369,20 +394,14 @@ mod tests {
             ntokens: 21,
             nkinds: vec![28, 28],
             nkind_patterns: vec![29, 20, 2],
-            nqueries: hashmap! {
-                &baz => 55,
-                &bar => 44,
-            },
+            nqueries: vec![55, 44],
         };
         let c2 = Counts {
             nfiles: 19,
             ntokens: 31,
             nkinds: vec![5, 9],
             nkind_patterns: vec![6, 10, 14],
-            nqueries: hashmap! {
-                &foo => 33,
-                &bar => 44,
-            },
+            nqueries: vec![33, 44],
         };
 
         c1 += c2;
@@ -391,11 +410,7 @@ mod tests {
             ntokens: 52,
             nkinds: vec![33, 37],
             nkind_patterns: vec![35, 30, 16],
-            nqueries: hashmap! {
-                &foo => 33,
-                &bar => 88,
-                &baz => 55,
-            },
+            nqueries: vec![33, 88, 55],
         };
         assert_eq!(expected, c1);
     }

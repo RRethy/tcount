@@ -90,7 +90,7 @@ fn run(cli: cli::Cli) -> Result<()> {
                 ntokens: 0,
                 nkinds: vec![0; cli.kinds.len()],
                 nkind_patterns: vec![0; cli.kind_patterns.len()],
-                nqueries: HashMap::new(),
+                nqueries: Vec::new(),
             },
             |mut cur, (_, counts)| {
                 cur += counts.clone();

@@ -82,9 +82,8 @@ impl FromStr for Query {
                     let query_str = fs::read_to_string(&path)?;
                     let mut query = tree_sitter::Query::new(tree_sitter_lang, &query_str)?;
                     match &kind {
-                        // this logic isn't tested since afaik there is no way to check disabled
-                        // captures (Query::capture_names returns disabled captures unfortunately)
                         QueryKind::Captures(captures) => {
+                            // Disable all captures that aren't used.
                             let unused_captures: Vec<String> = query
                                 .capture_names()
                                 .iter()

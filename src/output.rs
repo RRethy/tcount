@@ -1,5 +1,5 @@
 use crate::count::Counts;
-use crate::query::Query;
+use crate::query::{Query, QueryKind};
 use prettytable::{format, Cell, Row, Table};
 use regex::Regex;
 use std::format;
@@ -73,8 +73,11 @@ pub fn print(
     kind_patterns.iter().for_each(|kind_pat| {
         titles.push(title_cell(&format!("Pattern({})", kind_pat.to_string())))
     });
-    queries.iter().for_each(|query| {
-        titles.push(title_cell(&format!("Query({})", query.name)).style_spec("b"))
+    queries.iter().for_each(|query| match &query.kind {
+        QueryKind::Match => titles.push(title_cell(&format!("Query({})", query.name))),
+        QueryKind::Captures(names) => names.iter().for_each(|name| {
+            titles.push(title_cell(&format!("Query({}@{})", query.name, name)));
+        }),
     });
     table.set_titles(Row::new(titles));
 
@@ -108,9 +111,10 @@ pub fn print(
                 .iter()
                 .for_each(|n| cols.push(count_cell(*n)));
             // number of nodes for a specific query
-            queries.iter().for_each(|query| {
-                cols.push(count_cell(*count.nqueries.get(&query.name).unwrap_or(&0)))
-            });
+            count
+                .nqueries
+                .iter()
+                .for_each(|n| cols.push(count_cell(*n)));
             cols
         })
         .for_each(|row| {
