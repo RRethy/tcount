@@ -168,33 +168,20 @@ impl Counts {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::query::QueryKind;
-    use maplit::hashmap;
+    use std::str::FromStr;
+
+    fn queries_with_captures() -> Vec<Query> {
+        vec![
+            Query::from_str("comment").unwrap(),
+            Query::from_str("keyword@ifelse,repeat").unwrap(),
+            Query::from_str("string_literal").unwrap(),
+        ]
+    }
 
     fn queries() -> Vec<Query> {
-        let rust = Language::Rust;
-        let ts_rust = rust.get_treesitter_language().unwrap();
-        let go = Language::Go;
-        let ts_go = go.get_treesitter_language().unwrap();
-        let comment_query_rust =
-            tree_sitter::Query::new(ts_rust, "[(line_comment) (block_comment)]").unwrap();
-        let string_query_rust =
-            tree_sitter::Query::new(ts_rust, "[(string_literal) (raw_string_literal)]").unwrap();
-        let string_query_go =
-            tree_sitter::Query::new(ts_go, "[(interpreted_string_literal) (raw_string_literal)]")
-                .unwrap();
-
         vec![
-            Query {
-                name: String::from("comment"),
-                kind: QueryKind::Match,
-                langs: hashmap! { rust.clone() => comment_query_rust },
-            },
-            Query {
-                name: String::from("string_literal"),
-                kind: QueryKind::Match,
-                langs: hashmap! { rust.clone() => string_query_rust, go => string_query_go },
-            },
+            Query::from_str("comment").unwrap(),
+            Query::from_str("string_literal").unwrap(),
         ]
     }
 
@@ -228,8 +215,6 @@ mod tests {
             &Vec::new(),
             &queries,
         );
-        let comment = String::from("comment");
-        let string_literal = String::from("string_literal");
         let expected = Counts {
             nfiles: 1,
             ntokens: 0,
@@ -330,34 +315,12 @@ mod tests {
             &Vec::new(),
             &queries,
         );
-        let comment = String::from("comment");
-        let string_literal = String::from("string_literal");
         let expected = Counts {
             nfiles: 1,
             ntokens: 33,
             nkinds: Vec::new(),
             nkind_patterns: Vec::new(),
             nqueries: vec![4, 2],
-        };
-        assert_eq!(expected, got.unwrap());
-    }
-
-    #[test]
-    fn counting_queries_for_other_languages_are_not_used() {
-        let queries = queries();
-        let got = Counts::from_path(
-            "test_data/ruby.rb",
-            &Language::Ruby,
-            &Vec::new(),
-            &Vec::new(),
-            &queries,
-        );
-        let expected = Counts {
-            nfiles: 1,
-            ntokens: 10,
-            nkinds: Vec::new(),
-            nkind_patterns: Vec::new(),
-            nqueries: Vec::new(),
         };
         assert_eq!(expected, got.unwrap());
     }
@@ -372,8 +335,6 @@ mod tests {
             &vec![Regex::new(".*comment").unwrap()],
             &queries,
         );
-        let comment = String::from("comment");
-        let string_literal = String::from("string_literal");
         let expected = Counts {
             nfiles: 1,
             ntokens: 33,
@@ -385,16 +346,49 @@ mod tests {
     }
 
     #[test]
-    fn add_counts() {
-        let foo = String::from("foo");
-        let bar = String::from("bar");
-        let baz = String::from("baz");
+    fn counts_vec_from_query_hashmap_counts() {
+        let queries = queries_with_captures();
+        let mut nmatches = HashMap::new();
+        let comment = String::from("comment");
+        let string_literal = String::from("string_literal");
+        let keyword = String::from("keyword");
+        let ifelse = String::from("ifelse");
+        nmatches.insert(&comment, 5);
+        nmatches.insert(&string_literal, 7);
+        let mut ncaptures = HashMap::new();
+        ncaptures.insert((&keyword, &ifelse), 3);
+        let got = query_counts_from(&queries, nmatches, ncaptures);
+        assert_eq!(vec![5, 3, 0, 7], got);
+    }
+
+    #[test]
+    fn counting_queries_with_captures() {
+        let queries = queries_with_captures();
+        let got = Counts::from_path(
+            "test_data/rust3.rs",
+            &Language::Rust,
+            &vec![],
+            &vec![],
+            &queries,
+        );
+        let expected = Counts {
+            nfiles: 1,
+            ntokens: 73,
+            nkinds: vec![],
+            nkind_patterns: vec![],
+            nqueries: vec![4, 4, 3, 2],
+        };
+        assert_eq!(expected, got.unwrap());
+    }
+
+    #[test]
+    fn add_assign_counts() {
         let mut c1 = Counts {
             nfiles: 30,
             ntokens: 21,
             nkinds: vec![28, 28],
             nkind_patterns: vec![29, 20, 2],
-            nqueries: vec![55, 44],
+            nqueries: vec![0, 44, 55],
         };
         let c2 = Counts {
             nfiles: 19,
