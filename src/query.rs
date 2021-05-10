@@ -94,7 +94,10 @@ impl FromStr for Query {
                                 .iter()
                                 .for_each(|name| query.disable_capture(name));
                         }
-                        _ => {}
+                        QueryKind::Match => {
+                            let names: Vec<String> = query.capture_names().clone().into();
+                            names.iter().for_each(|name| query.disable_capture(&name));
+                        }
                     }
                     Ok((lang, query))
                 })
