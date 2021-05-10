@@ -72,15 +72,15 @@ pub struct Cli {
 
     #[structopt(
         long,
-        help = "Whitelist of languages to parse. This overrides --language-blacklist."
+        help = "Whitelist of languages to parse. This overrides --blacklist."
     )]
-    pub language_whitelist: Vec<String>,
+    pub whitelist: Vec<String>,
 
     #[structopt(
         long,
-        help = "Blacklist of languages not to parse. This is overriden by --language-whitelist."
+        help = "Blacklist of languages not to parse. This is overriden by --whitelist."
     )]
-    pub language_blacklist: Vec<String>,
+    pub blacklist: Vec<String>,
 
     #[structopt(long, help = "Show a list of supported languages")]
     pub list_languages: bool,

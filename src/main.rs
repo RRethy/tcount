@@ -20,10 +20,8 @@ use language::Language;
 use output::print;
 
 fn run(cli: cli::Cli) -> Result<()> {
-    let lang_whitelist: HashSet<String> =
-        HashSet::from_iter(cli.language_whitelist.iter().cloned());
-    let lang_blacklist: HashSet<String> =
-        HashSet::from_iter(cli.language_blacklist.iter().cloned());
+    let whitelist: HashSet<String> = HashSet::from_iter(cli.whitelist.iter().cloned());
+    let blacklist: HashSet<String> = HashSet::from_iter(cli.blacklist.iter().cloned());
 
     let (file_counts, errors): (Vec<_>, Vec<_>) = fs::iter_paths(
         &cli.paths,
@@ -35,10 +33,10 @@ fn run(cli: cli::Cli) -> Result<()> {
     .map(|res| {
         let path = res?;
         let lang = Language::from(path.as_ref());
-        let ignore_path = if lang_whitelist.len() == 0 {
-            lang_blacklist.len() == 0 || !lang_blacklist.contains(&lang.to_string())
+        let ignore_path = if whitelist.len() == 0 {
+            blacklist.len() == 0 || !blacklist.contains(&lang.to_string())
         } else {
-            lang_whitelist.contains(&lang.to_string())
+            whitelist.contains(&lang.to_string())
         };
 
         if ignore_path {
