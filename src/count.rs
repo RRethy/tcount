@@ -11,7 +11,7 @@ use tree_sitter::{Node, Parser, QueryCursor};
 
 /// Counts contains the cumulative totals for the how many files, number of tokens, number of nodes
 /// matching each kind specified by --kind, and number of matches for each query specified by
-/// --query.
+/// --query. @nqueries is ordered first by the queries arguments and then by captures.
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Counts {
     pub nfiles: u64,
@@ -22,6 +22,7 @@ pub struct Counts {
 }
 
 impl Counts {
+    /// Create a Counts struct with zero values and correctly sized fields
     pub fn empty(nkinds: usize, nkind_patterns: usize, queries: &Vec<Query>) -> Counts {
         Counts {
             nfiles: 0,
@@ -32,6 +33,7 @@ impl Counts {
         }
     }
 
+    /// Convert @nmatches and @ncaptures into a deterministically ordered vector
     fn nqueries(
         queries: &Vec<Query>,
         nmatches: HashMap<&String, u64>,
@@ -56,8 +58,8 @@ impl Counts {
 impl AddAssign for Counts {
     fn add_assign(&mut self, other: Self) {
         #[inline(always)]
-        // element-wise addition of two equal-sized vectors
         fn add(l: &mut Vec<u64>, r: &Vec<u64>) {
+            // element-wise addition of two equal-sized vectors
             l.iter_mut().zip(r).for_each(|(a, b)| *a += b);
         }
         self.nfiles += other.nfiles;
@@ -69,6 +71,7 @@ impl AddAssign for Counts {
 }
 
 impl Counts {
+    /// Try to count @path for the specified arguments
     pub fn from_path(
         path: impl AsRef<Path>,
         lang: &Language,
@@ -102,7 +105,7 @@ impl Counts {
             .expect("Unexpected internal error setting parser language");
 
         let mut qcursor = QueryCursor::new();
-        let text_callback = |n: Node| &text[n.byte_range()];
+        let text_callback = |n: Node| &text[n.byte_range()]; // weird but needed argument for queries
         match parser.parse(&text, None) {
             Some(tree) => {
                 queries.iter().for_each(|query| {
@@ -117,6 +120,9 @@ impl Counts {
                                 );
                             }
                             QueryKind::Captures(_) => {
+                                // We should only be finding capture names that were provided as
+                                // arguments since other capture names have been disabled in the
+                                // query
                                 let capture_names = ts_query.capture_names();
                                 qcursor
                                     .captures(ts_query, tree.root_node(), text_callback)
@@ -140,12 +146,12 @@ impl Counts {
                         // count each terminal node which is the closest we can get to counting
                         // tokens. For some tokens this is a bit misleading since they can have
                         // children (e.g. string_literal in rust), but it's the closest we can
-                        // acheive with tree-sitter.
+                        // achieve with tree-sitter.
                         if node.child_count() == 0 && !node.is_extra() && node.parent().is_some() {
                             ntokens += 1;
                         }
 
-                        // count each --kinds that matche the current nodes kind
+                        // count each --kinds that match the current nodes kind
                         kinds.iter().enumerate().for_each(|(i, kind)| {
                             if kind == node.kind() {
                                 nkinds[i] += 1;

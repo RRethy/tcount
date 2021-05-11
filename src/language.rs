@@ -1,4 +1,5 @@
 use crate::error::{Error, Result};
+use crate::output::print_languages;
 use std::cmp::{Eq, Ord, PartialEq, PartialOrd};
 use std::collections::HashMap;
 use std::ffi::OsString;
@@ -63,8 +64,8 @@ pub enum Language {
 }
 
 impl Language {
-    pub fn list_all() -> String {
-        let mut langs: Vec<(&Language, Vec<String>)> = EXT_TO_LANGUAGE
+    pub fn print_all() {
+        let mut lang_exts: Vec<(&Language, Vec<String>)> = EXT_TO_LANGUAGE
             .into_iter()
             .filter(|(_ext, lang)| lang.get_treesitter_language().is_ok())
             .fold(HashMap::new(), |mut acc, (ext, lang)| {
@@ -75,12 +76,20 @@ impl Language {
             })
             .into_iter()
             .collect();
-        langs.sort_by(|(l1, _), (l2, _)| l1.cmp(&l2));
-        langs
+        lang_exts.sort_by(|(l1, _), (l2, _)| l1.cmp(&l2));
+        let lang_dirs = DIR_TO_LANGUAGE
             .into_iter()
-            .map(|(lang, exts)| format!("{} ({})", lang, exts.join(",")))
-            .collect::<Vec<String>>()
-            .join("\n")
+            .filter(|(_dir, lang)| lang.get_treesitter_language().is_ok())
+            .fold(HashMap::new(), |mut acc, (dir, lang)| {
+                acc.entry(lang).or_insert(Vec::new()).push(dir.to_string());
+                acc
+            });
+        print_languages(
+            lang_exts
+                .into_iter()
+                .map(|(lang, exts)| (lang, exts, lang_dirs.get(&lang).unwrap()))
+                .collect(),
+        );
     }
 }
 
@@ -184,8 +193,13 @@ impl Language {
 impl From<&Path> for Language {
     fn from(path: &Path) -> Language {
         let (tag, map) = if path.is_dir() {
+            // we assign a `Language` to query directories which take the form {query dir}/{language}/{query name}.scm
+            // the {query name}.scm has already been stripped since this is a directory
             (path.file_name(), &DIR_TO_LANGUAGE)
         } else {
+            // we only check the extension to determine language
+            // TODO this could be improved on by looking for she-bangs, Vim modelines, or Emacs modelines,
+            // among a few other more complicated heuristics
             (path.extension(), &EXT_TO_LANGUAGE)
         };
         let tag = tag.map(OsString::from).unwrap_or(OsString::new());

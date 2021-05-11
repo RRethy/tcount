@@ -1,7 +1,9 @@
 use crate::count::Counts;
+use crate::language::Language;
 use crate::query::{Query, QueryKind};
 use prettytable::{format, Cell, Row, Table};
 use regex::Regex;
+use std::fmt::Display;
 use std::format;
 use std::str::FromStr;
 
@@ -23,29 +25,8 @@ impl FromStr for Format {
     }
 }
 
-#[inline]
-fn title_cell(content: &str) -> Cell {
-    Cell::new(content).style_spec("b")
-}
-#[inline]
-fn label_cell(label: &str) -> Cell {
-    Cell::new(label).style_spec("li")
-}
-#[inline]
-fn count_cell(count: u64) -> Cell {
-    Cell::new(&count.to_string()).style_spec("r")
-}
-
-pub fn print(
-    format: &Format,
-    counts: Vec<(String, Counts)>,
-    totals: Option<Counts>,
-    kinds: &Vec<String>,
-    kind_patterns: &Vec<Regex>,
-    queries: &Vec<Query>,
-) {
-    let mut table = Table::new();
-    let tbl_format = format::FormatBuilder::new()
+pub fn format_builder() -> format::FormatBuilder {
+    format::FormatBuilder::new()
         .borders('│')
         .separators(
             &[format::LinePosition::Top],
@@ -60,8 +41,36 @@ pub fn print(
             format::LineSeparator::new('─', '─', '╰', '╯'),
         )
         .padding(1, 1)
-        .build();
-    table.set_format(tbl_format);
+}
+
+#[inline]
+fn title_cell(content: &str) -> Cell {
+    Cell::new(content).style_spec("b")
+}
+#[inline]
+fn label_cell(label: &str) -> Cell {
+    Cell::new(label).style_spec("li")
+}
+#[inline]
+fn count_cell(count: u64) -> Cell {
+    Cell::new(&count.to_string()).style_spec("r")
+}
+
+#[inline]
+fn generic_cell(s: impl Display) -> Cell {
+    Cell::new(&s.to_string()).style_spec("l")
+}
+
+pub fn print(
+    format: &Format,
+    counts: Vec<(String, Counts)>,
+    totals: Option<Counts>,
+    kinds: &Vec<String>,
+    kind_patterns: &Vec<Regex>,
+    queries: &Vec<Query>,
+) {
+    let mut table = Table::new();
+    table.set_format(format_builder().build());
 
     let mut titles = Vec::with_capacity(3 + kinds.len() + kind_patterns.len() + queries.len());
     titles.push(title_cell(""));
@@ -130,4 +139,25 @@ pub fn print(
             Err(err) => eprintln!("{}", err),
         },
     }
+}
+
+pub fn print_languages(langs: Vec<(&Language, Vec<String>, &Vec<String>)>) {
+    let mut table = Table::new();
+    table.set_format(format_builder().build());
+
+    let mut titles = Vec::with_capacity(3);
+    titles.push(title_cell("Language"));
+    titles.push(title_cell("Extensions"));
+    titles.push(title_cell("Query Dir Name"));
+    table.set_titles(Row::new(titles));
+
+    langs.into_iter().for_each(|(lang, exts, dirs)| {
+        let mut cols = Vec::new();
+        cols.push(label_cell(&lang.to_string()));
+        cols.push(generic_cell(exts.join(",")));
+        cols.push(generic_cell(dirs.join(",")));
+        table.add_row(Row::new(cols));
+    });
+
+    table.printstd();
 }

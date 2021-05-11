@@ -2,7 +2,7 @@ use crate::error::Error;
 use rayon::prelude::*;
 use std::path::PathBuf;
 
-/// Recursively iterate over @paths and produce a parallel iterator over the files encountered.
+/// Recursively iterate over @paths and produce a parallel and unordered iterator over the files encountered.
 pub fn iter_paths<'a>(
     paths: &Vec<PathBuf>,
     no_git: bool,

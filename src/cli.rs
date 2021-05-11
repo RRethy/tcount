@@ -22,14 +22,14 @@ pub struct Cli {
     #[structopt(
         short,
         long,
-        help = "kinds of node in the syntax tree to count. See node-types.json in the parsers repo."
+        help = "kinds of node in the syntax tree to count. See node-types.json in the parser's repo."
     )]
     pub kinds: Vec<String>,
 
     #[structopt(
         short = "p",
         long,
-        help = "Patterns of node kinds to count in the syntax tree."
+        help = "Patterns of node kinds to count in the syntax tree (e.g. \".*comment.*\" to match nodes of type \"line_comment\", \"block_comment\", and \"comment\"). Supports Rust regular expressions"
     )]
     pub kind_patterns: Vec<Regex>,
 
@@ -63,20 +63,20 @@ pub struct Cli {
 
     #[structopt(
         long,
-        help = "Whitelist of languages to parse. This overrides --blacklist."
+        help = "Whitelist of languages to parse. This overrides --blacklist and must be an exact match"
     )]
     pub whitelist: Vec<String>,
 
     #[structopt(
         long,
-        help = "Blacklist of languages not to parse. This is overriden by --whitelist."
+        help = "Blacklist of languages not to parse. This is overriden by --whitelist and must be an exact match"
     )]
     pub blacklist: Vec<String>,
 
-    #[structopt(long, help = "Show a list of supported languages")]
+    #[structopt(long, help = "Show a list of supported languages for parsing")]
     pub list_languages: bool,
 
-    #[structopt(long, help = "Hide count totals")]
+    #[structopt(long, help = "Hide column totals")]
     pub hide_totals: bool,
 
     #[structopt(

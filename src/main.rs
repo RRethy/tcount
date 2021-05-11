@@ -115,7 +115,7 @@ fn main() {
     let cli = cli::Cli::from_args();
 
     if cli.list_languages {
-        println!("{}", Language::list_all());
+        Language::print_all();
     } else {
         match run(cli) {
             Err(err) => {
@@ -126,3 +126,5 @@ fn main() {
         }
     }
 }
+
+// TODO tests
