@@ -13,7 +13,7 @@ mod output;
 mod query;
 mod tree;
 
-use cli::OrderBy;
+use cli::{GroupBy, SortBy};
 use count::Counts;
 use error::{Error, Result};
 use language::Language;
@@ -49,16 +49,9 @@ fn run(cli: cli::Cli) -> Result<()> {
     })
     .partition(Result::is_ok);
 
-    let mut counts: Vec<(String, Counts)> = if cli.show_files {
-        file_counts
-            .into_iter()
-            .map(Result::unwrap)
-            .map(|(_lang, path, count)| (path.display().to_string(), count))
-            .collect()
-    } else {
-        file_counts
-            .into_iter()
-            .map(Result::unwrap)
+    let counts = file_counts.into_iter().map(Result::unwrap);
+    let mut counts: Vec<(String, Counts)> = match cli.group_by {
+        GroupBy::Language => counts
             .fold(HashMap::new(), |mut acc, (lang, _path, counts)| {
                 if let Some(cur) = acc.get_mut(&lang.to_string()) {
                     *cur += counts;
@@ -68,15 +61,19 @@ fn run(cli: cli::Cli) -> Result<()> {
                 acc
             })
             .into_iter()
-            .collect()
+            .collect(),
+        GroupBy::File => counts
+            .map(|(_lang, path, count)| (path.display().to_string(), count))
+            .collect(),
     };
-    match cli.order_by {
-        // sort asc lexographical order
-        OrderBy::Language | OrderBy::File => counts.sort_by(|(l1, _c1), (l2, _c2)| l1.cmp(l2)),
+
+    match cli.sort_by {
+        // sort asc lexographical order on either language or file
+        SortBy::Group => counts.sort_by(|(l1, _c1), (l2, _c2)| l1.cmp(l2)),
         // sort desc numerical order
-        OrderBy::NumFiles => counts.sort_by(|(_l1, c1), (_l2, c2)| c2.nfiles.cmp(&c1.nfiles)),
+        SortBy::NumFiles => counts.sort_by(|(_l1, c1), (_l2, c2)| c2.nfiles.cmp(&c1.nfiles)),
         // sort desc numerical order
-        OrderBy::Tokens => counts.sort_by(|(_l1, c1), (_l2, c2)| c2.ntokens.cmp(&c1.ntokens)),
+        SortBy::Tokens => counts.sort_by(|(_l1, c1), (_l2, c2)| c2.ntokens.cmp(&c1.ntokens)),
     }
 
     let totals: Option<Counts> = if cli.hide_totals {

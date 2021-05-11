@@ -33,27 +33,18 @@ pub struct Cli {
     )]
     pub kind_patterns: Vec<Regex>,
 
-    // #[structopt(
-    //     short,
-    //     long,
-    //     help = "Names of the tree-sitter queries found under {--queries-dir}/{language}/ to count.\n\nFor example, for a --queries-dir of `/foo/bar/` and a --queries of `foobar`, then /foo/bar/{language}/foobar.scm will be counted for all files of kind {language}.\n\nSee https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries"
-    // )]
-    // pub queries: Vec<String>,
     #[structopt(long, help = "TODO")]
     pub query: Vec<Query>,
 
     #[structopt(
         long,
-        help = "Shows counts for individual files instead of grouping by Language"
-    )]
-    pub show_files: bool,
-
-    #[structopt(
-        long,
         default_value = "tokens",
-        help = "One of language|file|numfiles|tokens"
+        help = "One of group|numfiles|tokens. \"group\" will sort based on --group-by value"
     )]
-    pub order_by: OrderBy,
+    pub sort_by: SortBy,
+
+    #[structopt(long, default_value = "language", help = "One of language|file")]
+    pub group_by: GroupBy,
 
     #[structopt(long, default_value = "table", help = "One of table|csv")]
     pub format: Format,
@@ -95,27 +86,64 @@ pub struct Cli {
     pub paths: Vec<PathBuf>,
 }
 
-#[derive(Debug)]
-pub enum OrderBy {
-    Language,
-    File,
+#[derive(Debug, PartialEq, Eq)]
+pub enum SortBy {
+    Group,
     NumFiles,
     Tokens,
 }
 
-impl FromStr for OrderBy {
+impl FromStr for SortBy {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "language" => Ok(OrderBy::Language),
-            "file" => Ok(OrderBy::File),
-            "numfiles" => Ok(OrderBy::NumFiles),
-            "tokens" => Ok(OrderBy::Tokens),
+            "group" => Ok(SortBy::Group),
+            "numfiles" => Ok(SortBy::NumFiles),
+            "tokens" => Ok(SortBy::Tokens),
             _ => Err(format!(
-                "\"{}\" is not supported. Use one of language|file|numfiles|tokens",
+                "\"{}\" is not a supported argument to --sort-by. Use one of group|numfiles|tokens",
                 s
             )),
         }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum GroupBy {
+    Language,
+    File,
+}
+
+impl FromStr for GroupBy {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "language" => Ok(GroupBy::Language),
+            "file" => Ok(GroupBy::File),
+            _ => Err(format!(
+                "\"{}\" is not a supported argument to --group-by. Use one of language|file",
+                s
+            )),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn group_by_from_str() {
+        assert_eq!(GroupBy::Language, GroupBy::from_str("language").unwrap());
+        assert_eq!(GroupBy::File, GroupBy::from_str("file").unwrap());
+    }
+
+    #[test]
+    fn sort_by_from_str() {
+        assert_eq!(SortBy::Group, SortBy::from_str("group").unwrap());
+        assert_eq!(SortBy::NumFiles, SortBy::from_str("numfiles").unwrap());
+        assert_eq!(SortBy::Tokens, SortBy::from_str("tokens").unwrap());
     }
 }
