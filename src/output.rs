@@ -73,7 +73,7 @@ pub fn print(
     table.set_format(format_builder().build());
 
     let mut titles = Vec::with_capacity(3 + kinds.len() + kind_patterns.len() + queries.len());
-    titles.push(title_cell(""));
+    titles.push(title_cell("Group"));
     titles.push(title_cell("Files"));
     titles.push(title_cell("Tokens"));
     kinds
