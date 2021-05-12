@@ -12,13 +12,6 @@ fn test_local_queries() {
                 env!("CARGO_MANIFEST_DIR")
             ),
         )
-        .env(
-            "CARGO_MANIFEST_DIR",
-            format!(
-                "{}/tests/fixtures/cargo_manifest_dir",
-                env!("CARGO_MANIFEST_DIR")
-            ),
-        )
         .args(
             [
                 "--format",
@@ -54,13 +47,6 @@ fn test_xdg_queries() {
                 env!("CARGO_MANIFEST_DIR")
             ),
         )
-        .env(
-            "CARGO_MANIFEST_DIR",
-            format!(
-                "{}/tests/fixtures/cargo_manifest_dir",
-                env!("CARGO_MANIFEST_DIR")
-            ),
-        )
         .args(
             [
                 "--format",
@@ -87,61 +73,12 @@ TOTALS,8,251,9
 }
 
 #[test]
-fn test_builtin_queries() {
-    tc().current_dir("tests/fixtures/")
-        .env(
-            "XDG_CONFIG_HOME",
-            format!(
-                "{}/tests/fixtures/xdg_config_home",
-                env!("CARGO_MANIFEST_DIR")
-            ),
-        )
-        .env(
-            "CARGO_MANIFEST_DIR",
-            format!(
-                "{}/tests/fixtures/cargo_manifest_dir",
-                env!("CARGO_MANIFEST_DIR")
-            ),
-        )
-        .args(
-            [
-                "--format",
-                "csv",
-                "--whitelist",
-                "Rust",
-                "Go",
-                "Ruby",
-                "--query",
-                "false",
-            ]
-            .iter(),
-        )
-        .assert()
-        .stdout(
-            r"Group,Files,Tokens,Query(false)
-Rust,5,156,0
-Go,1,52,0
-Ruby,2,43,0
-TOTALS,8,251,0
-",
-        )
-        .success();
-}
-
-#[test]
 fn test_queries_with_captures() {
     tc().current_dir("tests/fixtures/")
         .env(
             "XDG_CONFIG_HOME",
             format!(
                 "{}/tests/fixtures/xdg_config_home",
-                env!("CARGO_MANIFEST_DIR")
-            ),
-        )
-        .env(
-            "CARGO_MANIFEST_DIR",
-            format!(
-                "{}/tests/fixtures/cargo_manifest_dir",
                 env!("CARGO_MANIFEST_DIR")
             ),
         )

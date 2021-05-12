@@ -46,7 +46,7 @@ pub struct Cli {
     #[structopt(
         long,
         default_value = "language",
-        help = "One of language|file|arg. \"arg\" will group by the path arguments provided"
+        help = "One of language|file|arg. \"arg\" will group by the `paths` arguments provided"
     )]
     pub group_by: GroupBy,
 

@@ -29,17 +29,15 @@ impl FromStr for Query {
     ///     "foo@bar" -> Query name of "foo" and a capture name of "bar"
     ///     "foo@bar,baz" -> Query name of "foo" and capture names of "bar" and "baz"
     ///
-    /// A query directory is defined as a directory with subdirectories that contain query files
-    /// with the name "{query name}.scm". These subdirectories are named based on the language
-    /// those queries are written for. For example, a query directory tc_queries/ could have a
-    /// "comments" query for rust and ruby named queries/rust/comments.scm and
-    /// queries/ruby/comments.scm, respectively.
+    /// A query directory is as a directory with subdirectories that contain query files with the
+    /// name "{query name}.scm". These subdirectories are named based on the language those queries
+    /// are written for. For example, a query directory tc_queries/ could have a "comments" query
+    /// for rust and ruby named queries/rust/comments.scm and queries/ruby/comments.scm, respectively.
     ///
-    /// When searching for these query files, the following order is take. First, the present
-    /// working directory is searched for a query directory named .tc_queries/, then
-    /// $XDG_CONFIG_HOME/tc (defaults to $HOME/.config/tc) is searched for query directories
-    /// that match $XDG_CONFIG_HOME/tc/* (conflicting query files result in undefined behaviour),
-    /// lastly the builtin queries directory is searched.
+    /// When searching for these query files, first, the present working directory is searched for
+    /// a query directory named .tc_queries/, then $XDG_CONFIG_HOME/tc (defaults to $HOME/.config/tc)
+    /// is searched for query directories that match $XDG_CONFIG_HOME/tc/* (conflicting query files
+    /// result in undefined behaviour).
     fn from_str(name: &str) -> std::result::Result<Self, Self::Err> {
         let (kind, name) = match name.find('@') {
             Some(i) => (
@@ -60,12 +58,6 @@ impl FromStr for Query {
                 } else {
                     format!("~/{}", ".config")
                 },
-                name
-            ),
-            // look in the root of this repo for it's builtin_queries/ dir
-            format!(
-                "{}/builtin_queries/*/{}.scm",
-                var("CARGO_MANIFEST_DIR").unwrap_or(String::new()),
                 name
             ),
         ]
