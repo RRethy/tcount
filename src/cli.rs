@@ -80,8 +80,8 @@ pub struct Cli {
     #[structopt(long, help = "Show a list of supported languages for parsing")]
     pub list_languages: bool,
 
-    #[structopt(long, help = "Hide column totals")]
-    pub hide_totals: bool,
+    #[structopt(long, help = "Show column totals")]
+    pub show_totals: bool,
 
     #[structopt(
         default_value = ".",

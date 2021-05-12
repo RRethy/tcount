@@ -31,7 +31,6 @@ fn test_local_queries() {
 Rust,5,156,24
 Go,1,52,0
 Ruby,2,43,2
-TOTALS,8,251,26
 ",
         )
         .success();
@@ -66,7 +65,6 @@ fn test_xdg_queries() {
 Rust,5,156,3
 Go,1,52,0
 Ruby,2,43,6
-TOTALS,8,251,9
 ",
         )
         .success();
@@ -101,7 +99,6 @@ fn test_queries_with_captures() {
 Rust,5,156,12,12
 Go,1,52,0,0
 Ruby,2,43,1,1
-TOTALS,8,251,13,13
 ",
         )
         .success();

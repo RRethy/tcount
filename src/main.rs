@@ -115,9 +115,7 @@ fn run(cli: cli::Cli) -> Result<()> {
         SortBy::Tokens => counts.sort_by(|(_l1, c1), (_l2, c2)| c2.ntokens.cmp(&c1.ntokens)),
     }
 
-    let totals: Option<Counts> = if cli.hide_totals {
-        None
-    } else {
+    let totals: Option<Counts> = if cli.show_totals {
         Some(counts.iter().fold(
             Counts::empty(cli.kind.len(), cli.kind_pattern.len(), &cli.query),
             |mut cur, (_, counts)| {
@@ -125,6 +123,8 @@ fn run(cli: cli::Cli) -> Result<()> {
                 cur
             },
         ))
+    } else {
+        None
     };
 
     if counts.len() > 0 {

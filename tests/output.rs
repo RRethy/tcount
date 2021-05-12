@@ -9,7 +9,6 @@ Rust,5,156
 Go,1,52
 Ruby,2,43
 Unsupported,1,0
-TOTALS,9,251
 ";
 
     tc().current_dir("tests/fixtures")
@@ -28,7 +27,6 @@ fn test_format_table() {
 │ Go               1      52 │
 │ Ruby             2      43 │
 │ Unsupported      1       0 │
-│ TOTALS           9     251 │
 ╰────────────────────────────╯
 ";
     tc().current_dir("tests/fixtures")
