@@ -64,6 +64,34 @@ TOTALS,1,52
 }
 
 #[test]
+fn test_groupby_arguments() {
+    tc().current_dir("tests/fixtures/")
+        .args(
+            [
+                "--format",
+                "csv",
+                "--group-by",
+                "argument",
+                "--",
+                "go1.go",
+                "foo",
+                "ruby.rb",
+            ]
+            .iter(),
+        )
+        .assert()
+        .stdout(
+            r"Group,Files,Tokens
+foo,7,199
+go1.go,1,52
+ruby.rb,1,10
+TOTALS,9,261
+",
+        )
+        .success();
+}
+
+#[test]
 fn test_sortby_group() {
     tc().current_dir("tests/fixtures/")
         .args(["--format", "csv", "--sort-by", "group"].iter())

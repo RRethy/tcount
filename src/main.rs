@@ -1,6 +1,7 @@
 use rayon::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
+use std::path::{Path, PathBuf};
 use std::process;
 use structopt::StructOpt;
 
@@ -19,12 +20,14 @@ use error::{Error, Result};
 use language::Language;
 use output::print;
 
-fn run(cli: cli::Cli) -> Result<()> {
-    let whitelist: HashSet<String> = HashSet::from_iter(cli.whitelist.iter().cloned());
-    let blacklist: HashSet<String> = HashSet::from_iter(cli.blacklist.iter().cloned());
-
+fn get_counts_for_paths(
+    paths: &Vec<impl AsRef<Path>>,
+    cli: &cli::Cli,
+    whitelist: &HashSet<String>,
+    blacklist: &HashSet<String>,
+) -> (Vec<(Language, PathBuf, Counts)>, Vec<Error>) {
     let (file_counts, errors): (Vec<_>, Vec<_>) = fs::iter_paths(
-        &cli.paths,
+        paths,
         cli.no_git,
         cli.count_hidden,
         cli.no_dot_ignore,
@@ -47,23 +50,60 @@ fn run(cli: cli::Cli) -> Result<()> {
         }
     })
     .partition(Result::is_ok);
+    (
+        file_counts.into_iter().map(Result::unwrap).collect(),
+        errors.into_iter().map(Result::unwrap_err).collect(),
+    )
+}
 
-    let counts = file_counts.into_iter().map(Result::unwrap);
-    let mut counts: Vec<(String, Counts)> = match cli.group_by {
-        GroupBy::Language => counts
-            .fold(HashMap::new(), |mut acc, (lang, _path, counts)| {
-                if let Some(cur) = acc.get_mut(&lang.to_string()) {
-                    *cur += counts;
-                } else {
-                    acc.insert(lang.to_string(), counts);
-                }
-                acc
-            })
-            .into_iter()
-            .collect(),
-        GroupBy::File => counts
-            .map(|(_lang, path, count)| (path.display().to_string(), count))
-            .collect(),
+fn run(cli: cli::Cli) -> Result<()> {
+    let whitelist: HashSet<String> = HashSet::from_iter(cli.whitelist.iter().cloned());
+    let blacklist: HashSet<String> = HashSet::from_iter(cli.blacklist.iter().cloned());
+
+    let (mut counts, errors): (Vec<(String, Counts)>, Vec<Error>) = match cli.group_by {
+        GroupBy::Language => {
+            let (counts, errors) = get_counts_for_paths(&cli.paths, &cli, &whitelist, &blacklist);
+            let counts = counts
+                .into_iter()
+                .fold(HashMap::new(), |mut acc, (lang, _path, counts)| {
+                    if let Some(cur) = acc.get_mut(&lang.to_string()) {
+                        *cur += counts;
+                    } else {
+                        acc.insert(lang.to_string(), counts);
+                    }
+                    acc
+                })
+                .into_iter()
+                .collect();
+            (counts, errors)
+        }
+        GroupBy::File => {
+            let (counts, errors) = get_counts_for_paths(&cli.paths, &cli, &whitelist, &blacklist);
+            let counts = counts
+                .into_iter()
+                .map(|(_lang, path, count)| (path.display().to_string(), count))
+                .collect();
+            (counts, errors)
+        }
+        GroupBy::Argument => {
+            let (counts, errors): (Vec<_>, Vec<_>) = cli
+                .paths
+                .par_iter()
+                .map(|path| {
+                    let (counts, errors) =
+                        get_counts_for_paths(&vec![path], &cli, &whitelist, &blacklist);
+                    let counts = counts.into_iter().fold(
+                        Counts::empty(cli.kind.len(), cli.kind_pattern.len(), &cli.query),
+                        |mut acc, (_lang, _path, counts)| {
+                            acc += counts.clone();
+                            acc
+                        },
+                    );
+                    ((path.display().to_string(), counts), errors)
+                })
+                .unzip();
+            (counts, errors.into_iter().flatten().collect())
+        }
     };
 
     match cli.sort_by {
@@ -102,7 +142,6 @@ fn run(cli: cli::Cli) -> Result<()> {
 
     errors
         .into_iter()
-        .map(Result::unwrap_err)
         .filter(|err| err.should_show(cli.verbose))
         .for_each(|err| {
             eprintln!("{}", err);
