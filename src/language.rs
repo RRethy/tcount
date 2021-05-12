@@ -64,6 +64,7 @@ pub enum Language {
 }
 
 impl Language {
+    /// print all the supported languages, their file extensions, and query directory names
     pub fn print_all() {
         let mut lang_exts: Vec<(&Language, Vec<String>)> = EXT_TO_LANGUAGE
             .into_iter()
