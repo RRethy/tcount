@@ -85,7 +85,7 @@ fn run(cli: cli::Cli) -> Result<()> {
                 .collect();
             (counts, errors)
         }
-        GroupBy::Argument => {
+        GroupBy::Arg => {
             let (counts, errors): (Vec<_>, Vec<_>) = cli
                 .paths
                 .par_iter()

@@ -46,7 +46,7 @@ pub struct Cli {
     #[structopt(
         long,
         default_value = "language",
-        help = "One of language|file|argument. \"argument\" will group by the path arguments provided"
+        help = "One of language|file|arg. \"arg\" will group by the path arguments provided"
     )]
     pub group_by: GroupBy,
 
@@ -117,7 +117,7 @@ impl FromStr for SortBy {
 pub enum GroupBy {
     Language,
     File,
-    Argument,
+    Arg,
 }
 
 impl FromStr for GroupBy {
@@ -127,7 +127,7 @@ impl FromStr for GroupBy {
         match s {
             "language" => Ok(GroupBy::Language),
             "file" => Ok(GroupBy::File),
-            "argument" => Ok(GroupBy::Argument),
+            "arg" => Ok(GroupBy::Arg),
             _ => Err(format!(
                 "\"{}\" is not a supported argument to --group-by. Use one of language|file",
                 s
@@ -144,7 +144,7 @@ mod tests {
     fn group_by_from_str() {
         assert_eq!(GroupBy::Language, GroupBy::from_str("language").unwrap());
         assert_eq!(GroupBy::File, GroupBy::from_str("file").unwrap());
-        assert_eq!(GroupBy::Argument, GroupBy::from_str("argument").unwrap());
+        assert_eq!(GroupBy::Arg, GroupBy::from_str("arg").unwrap());
     }
 
     #[test]

@@ -71,7 +71,7 @@ fn test_groupby_arguments() {
                 "--format",
                 "csv",
                 "--group-by",
-                "argument",
+                "arg",
                 "--",
                 "go1.go",
                 "foo",
