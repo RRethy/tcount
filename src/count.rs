@@ -1,7 +1,7 @@
 use crate::error::{Error, Result};
 use crate::language::Language;
 use crate::query::{Query, QueryKind};
-use crate::tree;
+use crate::tree::TreeIterator;
 use regex::Regex;
 use std::collections::HashMap;
 use std::fs;
@@ -141,7 +141,7 @@ impl Counts {
                     }
                 });
 
-                tree::traverse(&tree, |node| {
+                TreeIterator::new(&tree).for_each(|node| {
                     if !node.is_missing() {
                         // count each terminal node which is the closest we can get to counting
                         // tokens. For some tokens this is a bit misleading since they can have

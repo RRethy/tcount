@@ -1,24 +1,45 @@
-use tree_sitter::{Node, Tree};
+use tree_sitter::{Node, Tree, TreeCursor};
 
-/// Pre-order traversal of the syntax tree that triggers @node_fn at each node
-/// TODO This could be cleaned up to return an iterator
-pub fn traverse<CB>(tree: &Tree, mut node_fn: CB)
-where
-    CB: FnMut(&Node),
-{
-    let mut cursor = tree.walk();
-    'outer: loop {
-        let node = cursor.node();
-        node_fn(&node);
-        if !cursor.goto_first_child() && !cursor.goto_next_sibling() {
-            'inner: loop {
-                if !cursor.goto_parent() {
-                    break 'outer;
+pub struct TreeIterator<'a> {
+    cursor: TreeCursor<'a>,
+    next: Option<Node<'a>>,
+}
+
+impl<'a> TreeIterator<'a> {
+    pub fn new(tree: &'a Tree) -> Self {
+        let cursor = tree.walk();
+        Self {
+            next: Some(cursor.node()),
+            cursor,
+        }
+    }
+}
+
+impl<'a> Iterator for TreeIterator<'a> {
+    type Item = Node<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(next) = self.next {
+            let cursor = &mut self.cursor;
+            // preoder traverse to find next node
+            self.next = if !cursor.goto_first_child() && !cursor.goto_next_sibling() {
+                // look for a parent with a sibling that we have yet to visit
+                loop {
+                    if !cursor.goto_parent() {
+                        // we are back at the root of the syntax tree and preorder traversal is
+                        // done
+                        break None;
+                    }
+                    if cursor.goto_next_sibling() {
+                        break Some(cursor.node());
+                    }
                 }
-                if cursor.goto_next_sibling() {
-                    break 'inner;
-                }
-            }
+            } else {
+                Some(cursor.node())
+            };
+            Some(next)
+        } else {
+            None
         }
     }
 }
@@ -41,6 +62,7 @@ fn main() {
         let mut parser = tree_sitter::Parser::new();
         parser.set_language(tree_sitter_rust::language()).unwrap();
         let tree = parser.parse(&text, None).unwrap();
+        let tree_iter = TreeIterator::new(&tree);
         let kinds = vec![
             "source_file",
             "function_item",
@@ -82,10 +104,9 @@ fn main() {
             ";",
             "}",
         ];
-        let mut i = 0;
-        traverse(&tree, |node| {
-            assert_eq!(kinds[i], node.kind());
-            i += 1;
-        });
+        assert_eq!(
+            kinds,
+            tree_iter.map(|node| node.kind()).collect::<Vec<&str>>()
+        );
     }
 }
