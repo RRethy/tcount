@@ -29,11 +29,27 @@ pub struct Cli {
     #[structopt(
         short = "p",
         long,
-        help = "Patterns of node kinds to count in the syntax tree (e.g. \".*comment.*\" to match nodes of type \"line_comment\", \"block_comment\", and \"comment\"). Supports Rust regular expressions"
+        help = "Patterns of node kinds to count in the syntax tree (e.g. \".*comment\" to match nodes of type \"line_comment\", \"block_comment\", and \"comment\"). Supports Rust regular expressions"
     )]
     pub kind_pattern: Vec<Regex>,
 
-    #[structopt(long, help = "TODO")]
+    #[structopt(
+        long,
+        help = r#"Tree-sitter queries to count. The query name can also be suffixed with @{capture}+ to instead count one of more captures inside the query.
+For example, --query="foo" will count the matches for the foo query while --query="foo@bar,baz" will count the captures @bar and @baz in the foo query.
+
+Queries for each language are searched for in the following locations:
+    1. $PWD/.tc_queries/{language}/{query}.scm
+    2. $XDG_CONFIG_HOME/tc/*/{language}/{query}.scm (the * is expanded without a deterministic ordering)
+For example, you could have a query file to match comments in Rust at $PWD/.tc_queries/rust/comments.scm with the contents `[(line_comment)(block_comment)]` which is used as --query="comments".
+
+See https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries for more information on writing queries and the Tree-sitter parser's repo for examples (under the queries/ directory usually).
+
+NOTE: Simple queries can probably be replaced with --kind-pattern. E.g. --kind-pattern=".*comment" usually suffices.
+NOTE: If a query file is found at {dir}/{language}/{query}.scm, then no other {dir} will be searched and only languages in {dir} that have a {query}.scm will have the query counted for them.
+NOTE: The syntax for {language} for each language can be seen by running --list-languages.
+NOTE: $XDG_CONFIG_HOME defaults to $HOME/.config."#
+    )]
     pub query: Vec<Query>,
 
     #[structopt(
