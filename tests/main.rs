@@ -193,3 +193,17 @@ Unsupported,1,0,0
         )
         .success();
 }
+
+#[test]
+fn test_top_n() {
+    tc().current_dir("tests/fixtures/")
+        .args(["--format", "csv", "--top", "2"].iter())
+        .assert()
+        .stdout(
+            r"Group,Files,Tokens
+Rust,5,156
+Go,1,52
+",
+        )
+        .success();
+}

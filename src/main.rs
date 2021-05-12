@@ -127,6 +127,12 @@ fn run(cli: cli::Cli) -> Result<()> {
         None
     };
 
+    let counts = if let Some(n) = cli.top {
+        counts.into_iter().take(n).collect()
+    } else {
+        counts
+    };
+
     if counts.len() > 0 {
         print(
             &cli.format,

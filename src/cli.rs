@@ -9,7 +9,7 @@ use structopt::StructOpt;
 #[derive(StructOpt, Debug)]
 #[structopt(
     name = "tc",
-    about = "Count your code by tokens, token kinds, and patterns in the syntax tree."
+    about = "Count your code by tokens, node kinds, and patterns in the syntax tree."
 )]
 pub struct Cli {
     #[structopt(
@@ -22,7 +22,7 @@ pub struct Cli {
     #[structopt(
         short,
         long,
-        help = "kinds of node in the syntax tree to count. See node-types.json in the parser's repo."
+        help = "kinds of nodes in the syntax tree to count. See node-types.json in the parser's repo to see the names of nodes or use https://tree-sitter.github.io/tree-sitter/playground."
     )]
     pub kind: Vec<String>,
 
@@ -96,8 +96,11 @@ NOTE: $XDG_CONFIG_HOME defaults to $HOME/.config."#
     #[structopt(long, help = "Show a list of supported languages for parsing")]
     pub list_languages: bool,
 
-    #[structopt(long, help = "Show column totals")]
+    #[structopt(long, help = "Show column totals. This is not affected by --top")]
     pub show_totals: bool,
+
+    #[structopt(long, help = "How many of the top results to show")]
+    pub top: Option<usize>,
 
     #[structopt(
         default_value = ".",
