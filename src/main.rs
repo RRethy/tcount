@@ -40,8 +40,7 @@ fn run(cli: cli::Cli) -> Result<()> {
         };
 
         if ignore_path {
-            let counts =
-                Counts::from_path(&path, &lang, &cli.kinds, &cli.kind_patterns, &cli.query)?;
+            let counts = Counts::from_path(&path, &lang, &cli.kind, &cli.kind_pattern, &cli.query)?;
             Ok((lang, path, counts))
         } else {
             Err(Error::LanguageIgnored(path, lang))
@@ -80,7 +79,7 @@ fn run(cli: cli::Cli) -> Result<()> {
         None
     } else {
         Some(counts.iter().fold(
-            Counts::empty(cli.kinds.len(), cli.kind_patterns.len(), &cli.query),
+            Counts::empty(cli.kind.len(), cli.kind_pattern.len(), &cli.query),
             |mut cur, (_, counts)| {
                 cur += counts.clone();
                 cur
@@ -93,8 +92,8 @@ fn run(cli: cli::Cli) -> Result<()> {
             &cli.format,
             counts,
             totals,
-            &cli.kinds,
-            &cli.kind_patterns,
+            &cli.kind,
+            &cli.kind_pattern,
             &cli.query,
         );
     } else {

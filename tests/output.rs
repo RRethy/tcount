@@ -5,16 +5,14 @@ use utils::tc;
 #[test]
 fn test_format_csv() {
     let expected = r"Group,Files,Tokens
-Tree-sitter Query,21,378
 Rust,5,156
 Go,1,52
 Ruby,2,43
 Unsupported,1,0
-TOTALS,30,629
+TOTALS,9,251
 ";
 
-    tc()
-        .current_dir("tests/fixtures")
+    tc().current_dir("tests/fixtures")
         .args(["--format", "csv"].iter())
         .assert()
         .stdout(expected)
@@ -23,19 +21,17 @@ TOTALS,30,629
 
 #[test]
 fn test_format_table() {
-let expected = r"╭──────────────────────────────────╮
-│ Group              Files  Tokens │
-│──────────────────────────────────│
-│ Tree-sitter Query     21     378 │
-│ Rust                   5     156 │
-│ Go                     1      52 │
-│ Ruby                   2      43 │
-│ Unsupported            1       0 │
-│ TOTALS                30     629 │
-╰──────────────────────────────────╯
+    let expected = r"╭────────────────────────────╮
+│ Group        Files  Tokens │
+│────────────────────────────│
+│ Rust             5     156 │
+│ Go               1      52 │
+│ Ruby             2      43 │
+│ Unsupported      1       0 │
+│ TOTALS           9     251 │
+╰────────────────────────────╯
 ";
-    tc()
-        .current_dir("tests/fixtures")
+    tc().current_dir("tests/fixtures")
         .args(["--format", "table"].iter())
         .assert()
         .stdout(expected)

@@ -1,0 +1,171 @@
+mod utils;
+
+use utils::tc;
+
+#[test]
+fn test_local_queries() {
+    tc().current_dir("tests/fixtures/")
+        .env(
+            "XDG_CONFIG_HOME",
+            format!(
+                "{}/tests/fixtures/xdg_config_home",
+                env!("CARGO_MANIFEST_DIR")
+            ),
+        )
+        .env(
+            "CARGO_MANIFEST_DIR",
+            format!(
+                "{}/tests/fixtures/cargo_manifest_dir",
+                env!("CARGO_MANIFEST_DIR")
+            ),
+        )
+        .args(
+            [
+                "--format",
+                "csv",
+                "--whitelist",
+                "Rust",
+                "Go",
+                "Ruby",
+                "--query",
+                "_test",
+            ]
+            .iter(),
+        )
+        .assert()
+        .stdout(
+            r"Group,Files,Tokens,Query(_test)
+Rust,5,156,24
+Go,1,52,0
+Ruby,2,43,2
+TOTALS,8,251,26
+",
+        )
+        .success();
+}
+
+#[test]
+fn test_xdg_queries() {
+    tc().current_dir("tests/fixtures/")
+        .env(
+            "XDG_CONFIG_HOME",
+            format!(
+                "{}/tests/fixtures/xdg_config_home",
+                env!("CARGO_MANIFEST_DIR")
+            ),
+        )
+        .env(
+            "CARGO_MANIFEST_DIR",
+            format!(
+                "{}/tests/fixtures/cargo_manifest_dir",
+                env!("CARGO_MANIFEST_DIR")
+            ),
+        )
+        .args(
+            [
+                "--format",
+                "csv",
+                "--whitelist",
+                "Rust",
+                "Go",
+                "Ruby",
+                "--query",
+                "string",
+            ]
+            .iter(),
+        )
+        .assert()
+        .stdout(
+            r"Group,Files,Tokens,Query(string)
+Rust,5,156,3
+Go,1,52,0
+Ruby,2,43,6
+TOTALS,8,251,9
+",
+        )
+        .success();
+}
+
+#[test]
+fn test_builtin_queries() {
+    tc().current_dir("tests/fixtures/")
+        .env(
+            "XDG_CONFIG_HOME",
+            format!(
+                "{}/tests/fixtures/xdg_config_home",
+                env!("CARGO_MANIFEST_DIR")
+            ),
+        )
+        .env(
+            "CARGO_MANIFEST_DIR",
+            format!(
+                "{}/tests/fixtures/cargo_manifest_dir",
+                env!("CARGO_MANIFEST_DIR")
+            ),
+        )
+        .args(
+            [
+                "--format",
+                "csv",
+                "--whitelist",
+                "Rust",
+                "Go",
+                "Ruby",
+                "--query",
+                "false",
+            ]
+            .iter(),
+        )
+        .assert()
+        .stdout(
+            r"Group,Files,Tokens,Query(false)
+Rust,5,156,0
+Go,1,52,0
+Ruby,2,43,0
+TOTALS,8,251,0
+",
+        )
+        .success();
+}
+
+#[test]
+fn test_queries_with_captures() {
+    tc().current_dir("tests/fixtures/")
+        .env(
+            "XDG_CONFIG_HOME",
+            format!(
+                "{}/tests/fixtures/xdg_config_home",
+                env!("CARGO_MANIFEST_DIR")
+            ),
+        )
+        .env(
+            "CARGO_MANIFEST_DIR",
+            format!(
+                "{}/tests/fixtures/cargo_manifest_dir",
+                env!("CARGO_MANIFEST_DIR")
+            ),
+        )
+        .args(
+            [
+                "--format",
+                "csv",
+                "--whitelist",
+                "Rust",
+                "Go",
+                "Ruby",
+                "--query",
+                "_test@pwd.test,pwd.test2",
+            ]
+            .iter(),
+        )
+        .assert()
+        .stdout(
+            r"Group,Files,Tokens,Query(_test@pwd.test),Query(_test@pwd.test2)
+Rust,5,156,12,12
+Go,1,52,0,0
+Ruby,2,43,1,1
+TOTALS,8,251,13,13
+",
+        )
+        .success();
+}

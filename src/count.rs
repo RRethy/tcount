@@ -204,7 +204,7 @@ mod tests {
     fn counting_unsupported_language() {
         let queries = Vec::new();
         let got = Counts::from_path(
-            "test_data/unsupported.abc",
+            "tests/fixtures/unsupported.abc",
             &Language::Unsupported,
             &Vec::new(),
             &Vec::new(),
@@ -224,7 +224,7 @@ mod tests {
     fn counting_nothing() {
         let queries = queries();
         let got = Counts::from_path(
-            "test_data/empty.rs",
+            "tests/fixtures/empty.rs",
             &Language::Rust,
             &Vec::new(),
             &Vec::new(),
@@ -244,7 +244,7 @@ mod tests {
     fn counting_tokens() {
         let queries = Vec::new();
         let got = Counts::from_path(
-            "test_data/rust1.rs",
+            "tests/fixtures/rust1.rs",
             &Language::Rust,
             &Vec::new(),
             &Vec::new(),
@@ -264,7 +264,7 @@ mod tests {
     fn counting_tokens_for_invalid_syntax() {
         let queries = Vec::new();
         let got = Counts::from_path(
-            "test_data/invalid.rs",
+            "tests/fixtures/invalid.rs",
             &Language::Rust,
             &Vec::new(),
             &Vec::new(),
@@ -284,7 +284,7 @@ mod tests {
     fn counting_node_kinds() {
         let queries = Vec::new();
         let got = Counts::from_path(
-            "test_data/rust1.rs",
+            "tests/fixtures/rust1.rs",
             &Language::Rust,
             &vec!["identifier".into(), "::".into()],
             &Vec::new(),
@@ -304,7 +304,7 @@ mod tests {
     fn counting_node_kind_patterns() {
         let queries = Vec::new();
         let got = Counts::from_path(
-            "test_data/rust1.rs",
+            "tests/fixtures/rust1.rs",
             &Language::Rust,
             &vec!["block_comment".into(), "line_comment".into()],
             &vec![Regex::new(".*comment").unwrap()],
@@ -324,7 +324,7 @@ mod tests {
     fn counting_queries() {
         let queries = queries();
         let got = Counts::from_path(
-            "test_data/rust1.rs",
+            "tests/fixtures/rust1.rs",
             &Language::Rust,
             &Vec::new(),
             &Vec::new(),
@@ -344,7 +344,7 @@ mod tests {
     fn counting_everything() {
         let queries = queries();
         let got = Counts::from_path(
-            "test_data/rust1.rs",
+            "tests/fixtures/rust1.rs",
             &Language::Rust,
             &vec!["block_comment".into(), "line_comment".into()],
             &vec![Regex::new(".*comment").unwrap()],
@@ -380,7 +380,7 @@ mod tests {
     fn counting_queries_with_captures() {
         let queries = queries_with_captures();
         let got = Counts::from_path(
-            "test_data/rust3.rs",
+            "tests/fixtures/rust3.rs",
             &Language::Rust,
             &vec![],
             &vec![],

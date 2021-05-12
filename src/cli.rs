@@ -24,14 +24,14 @@ pub struct Cli {
         long,
         help = "kinds of node in the syntax tree to count. See node-types.json in the parser's repo."
     )]
-    pub kinds: Vec<String>,
+    pub kind: Vec<String>,
 
     #[structopt(
         short = "p",
         long,
         help = "Patterns of node kinds to count in the syntax tree (e.g. \".*comment.*\" to match nodes of type \"line_comment\", \"block_comment\", and \"comment\"). Supports Rust regular expressions"
     )]
-    pub kind_patterns: Vec<Regex>,
+    pub kind_pattern: Vec<Regex>,
 
     #[structopt(long, help = "TODO")]
     pub query: Vec<Query>,
