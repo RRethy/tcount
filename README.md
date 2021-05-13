@@ -36,7 +36,7 @@ cargo install --git https://github.com/RRethy/tc.git
 
 # tc Cookbook
 
-**Note**: None of these use --query, see [Queries](https://github.com/RRethy/tc#Queries) for information on that option
+**Note**: None of these use --query, see [Queries](https://github.com/RRethy/tc/blob/master/QUERIES.md) for information on that option
 
 ## Compare size of each language in pwd
 
