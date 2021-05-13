@@ -6,6 +6,8 @@
 
 <h4 align="center">Count your code by tokens, types of syntax tree nodes, and patterns in the syntax tree.</h4>
 
+[![Build Status](https://www.travis-ci.com/RRethy/tc.svg?branch=master)](https://travis-ci.com/RRethy/tc)
+
 # Quick Start
 
 Simply run `tc` in your project root to count tokens and files and print the results grouped by Language. E.g.,
