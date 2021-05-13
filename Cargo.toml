@@ -10,6 +10,7 @@ cc="*"
 [dev-dependencies]
 assert_cmd = "1.0.3"
 
+# Commented out crates are parsers which are out of date
 [dependencies]
 structopt = "0.3"
 regex = "1"
