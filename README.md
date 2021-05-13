@@ -156,7 +156,7 @@ TODO
 
 # Counting Tree-sitter Queries
 
-[See the wiki](https://github.com/RRethy/tc)
+See [QUERIES.md](https://github.com/RRethy/tc/blob/master/QUERIES.md)
 
 # Performance
 
