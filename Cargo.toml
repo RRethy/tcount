@@ -9,7 +9,6 @@ cc="*"
 
 [dev-dependencies]
 assert_cmd = "1.0.3"
-maplit = "1.0.2"
 
 [dependencies]
 structopt = "0.3"
