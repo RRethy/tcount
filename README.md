@@ -6,7 +6,7 @@
 
 <h4 align="center">Count your code by tokens, types of syntax tree nodes, and patterns in the syntax tree.</h4>
 
-[![Build Status](https://www.travis-ci.com/RRethy/tc.svg?branch=master)](https://travis-ci.com/RRethy/tc)
+![Build Status](https://github.com/RRethy/tc/actions/workflows/rust.yml/badge.svg)
 
 # Quick Start
 
