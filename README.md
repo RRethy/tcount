@@ -142,6 +142,38 @@ tc --whitelist Go Rust -- foo/
 ```bash
 tc --list-languages
 ```
+```
+──────────────────────────────────────────────────────────────────────
+ Language           Extensions                        Query Dir Name 
+──────────────────────────────────────────────────────────────────────
+ Bash               .bash                             bash 
+ BibTeX             .bib                              bibtex 
+ C                  .h,.c                             c 
+ C#                 .csx,.cs                          c_sharp 
+ Clojure            .clj                              clojure 
+ C++                .cxx,.c++,.h++,.hh,.cc,.cpp,.hpp  cpp 
+ CSS                .css                              css 
+ Elm                .elm                              elm 
+ Erlang             .erl,.hrl                         erlang 
+ Go                 .go                               go 
+ HTML               .html                             html 
+ Java               .java                             java 
+ Javascript         .js,.mjs                          javascript 
+ JSON               .json                             json 
+ Julia              .jl                               julia 
+ LaTeX              .tex                              latex 
+ Markdown           .md                               markdown 
+ OCaml              .ml                               ocaml 
+ OCaml Interface    .mli                              ocaml_interface 
+ Python             .pyw,.py                          python 
+ Tree-sitter Query  .scm                              query 
+ Ruby               .rb                               ruby 
+ Rust               .rs                               rust 
+ Scala              .scala,.sc                        scala 
+ Svelte             .svelte                           svelte 
+ Typescript         .ts                               typescript 
+──────────────────────────────────────────────────────────────────────
+```
 
 # Why count tokens instead of lines
 

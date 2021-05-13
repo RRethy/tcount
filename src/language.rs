@@ -166,7 +166,7 @@ impl Language {
             Language::Cpp => Ok(tree_sitter_cpp::language()),
             Language::CSS => Ok(tree_sitter_css::language()),
             Language::Elm => Ok(tree_sitter_elm::language()),
-            Language::EmbeddedTemplate => Ok(tree_sitter_embedded_template::language()),
+            // Language::EmbeddedTemplate => Ok(tree_sitter_embedded_template::language()),
             Language::Erlang => Ok(tree_sitter_erlang::language()),
             Language::Go => Ok(tree_sitter_go::language()),
             Language::HTML => Ok(tree_sitter_html::language()),
@@ -185,7 +185,7 @@ impl Language {
             Language::Scala => Ok(tree_sitter_scala::language()),
             Language::Svelte => Ok(tree_sitter_svelte::language()),
             Language::Typescript => Ok(tree_sitter_typescript::language_typescript()),
-            Language::TSX => Ok(tree_sitter_typescript::language_tsx()),
+            // Language::TSX => Ok(tree_sitter_typescript::language_tsx()),
             _ => return Err(Error::UnsupportedLanguage),
         }
     }
