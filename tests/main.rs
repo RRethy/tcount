@@ -33,7 +33,7 @@ Unsupported,1,0
 #[test]
 fn test_groupby_language() {
     tc().current_dir("tests/fixtures/")
-        .args(["--format", "csv", "--group-by", "language"].iter())
+        .args(["--format", "csv", "--groupby", "language"].iter())
         .assert()
         .stdout(
             r"Group,Files,Tokens
@@ -49,7 +49,7 @@ Unsupported,1,0
 #[test]
 fn test_groupby_file() {
     tc().current_dir("tests/fixtures/")
-        .args(["--format", "csv", "--group-by", "file", "--whitelist", "Go"].iter())
+        .args(["--format", "csv", "--groupby", "file", "--whitelist", "Go"].iter())
         .assert()
         .stdout(
             r"Group,Files,Tokens
@@ -66,7 +66,7 @@ fn test_groupby_arguments() {
             [
                 "--format",
                 "csv",
-                "--group-by",
+                "--groupby",
                 "arg",
                 "--",
                 "go1.go",

@@ -60,7 +60,7 @@ fn run(cli: cli::Cli) -> Result<()> {
     let whitelist: HashSet<String> = HashSet::from_iter(cli.whitelist.iter().cloned());
     let blacklist: HashSet<String> = HashSet::from_iter(cli.blacklist.iter().cloned());
 
-    let (mut counts, errors): (Vec<(String, Counts)>, Vec<Error>) = match cli.group_by {
+    let (mut counts, errors): (Vec<(String, Counts)>, Vec<Error>) = match cli.groupby {
         GroupBy::Language => {
             let (counts, errors) = get_counts_for_paths(&cli.paths, &cli, &whitelist, &blacklist);
             let counts = counts

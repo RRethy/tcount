@@ -45,13 +45,13 @@ tc
 ## Top 5 files by token count
 
 ```bash
-tc --group-by=file --top=5
+tc --groupby=file --top=5
 ```
 
 ## Compare size of each directory in pwd
 
 ```bash
-tc --group-by=arg */
+tc --groupby=arg */
 ```
 
 ## Compare size of all Go files vs all Rust files
@@ -63,7 +63,7 @@ tc --whitelist=Go,Rust
 ## Compare size of a Go file and a Rust file
 
 ```bash
-tc --group-by=file foo.go foo.rs
+tc --groupby=file foo.go foo.rs
 ```
 
 ## Count comments for each language

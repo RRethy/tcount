@@ -55,7 +55,7 @@ NOTE: $XDG_CONFIG_HOME defaults to $HOME/.config."#
     #[structopt(
         long,
         default_value = "tokens",
-        help = "One of group|numfiles|tokens. \"group\" will sort based on --group-by value"
+        help = "One of group|numfiles|tokens. \"group\" will sort based on --groupby value"
     )]
     pub sort_by: SortBy,
 
@@ -64,7 +64,7 @@ NOTE: $XDG_CONFIG_HOME defaults to $HOME/.config."#
         default_value = "language",
         help = "One of language|file|arg. \"arg\" will group by the `paths` arguments provided"
     )]
-    pub group_by: GroupBy,
+    pub groupby: GroupBy,
 
     #[structopt(long, default_value = "table", help = "One of table|csv")]
     pub format: Format,
@@ -148,7 +148,7 @@ impl FromStr for GroupBy {
             "file" => Ok(GroupBy::File),
             "arg" => Ok(GroupBy::Arg),
             _ => Err(format!(
-                "\"{}\" is not a supported argument to --group-by. Use one of language|file",
+                "\"{}\" is not a supported argument to --groupby. Use one of language|file",
                 s
             )),
         }
