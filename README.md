@@ -4,21 +4,23 @@
 
 <p align="center"><em>(pronounced "tee-see")</em></p>
 
-<h4 align="center">Count your code by tokens, node kinds, and patterns in the syntax tree.</h4>
+<h4 align="center">Count your code by tokens, types of syntax tree nodes, and patterns in the syntax tree.</h4>
 
 # Quick Start
 
 Simply run `tc` in your project root to count tokens and files and print the results grouped by Language. E.g.,
 
 ```bash
-$ tc
-╭─────────────────────────╮
-│ Group     Files  Tokens │
-│─────────────────────────│
-│ Rust         18   10314 │
-│ Go            9    4022 │
-│ Ruby          2     244 │
-╰─────────────────────────╯
+tc
+```
+```txt
+────────────────────────────
+ Group        Files  Tokens
+────────────────────────────
+ Rust            18   10309
+ Go               8    4539
+ Ruby             6    1301
+────────────────────────────
 ```
 
 ## Installation
@@ -41,23 +43,45 @@ cargo install --git https://github.com/RRethy/tc.git
 ```bash
 tc
 ```
+```txt
+────────────────────────────
+ Group        Files  Tokens
+────────────────────────────
+ Rust            18   10309
+ Go               8    4539
+ Ruby             6    1301
+────────────────────────────
+```
 
 ## Top 5 files by token count
 
 ```bash
 tc --groupby=file --top=5
 ```
-
-## Compare size of each directory in pwd
-
-```bash
-tc --groupby=arg */
+```txt
+──────────────────────────────────
+ Group              Files  Tokens
+──────────────────────────────────
+ ./src/count.rs         1    2451
+ ./src/language.rs      1    1685
+ ./src/main.rs          1    1214
+ ./src/output.rs        1    1157
+ ./src/cli.rs           1     757
+──────────────────────────────────
 ```
 
-## Compare size of all Go files vs all Rust files
+## Compare size of two directories
 
 ```bash
-tc --whitelist=Go,Rust
+tc --groupby=arg go/scc/ rust/tokei/
+```
+```txt
+─────────────────────────────────────────────
+ Group                         Files  Tokens 
+─────────────────────────────────────────────
+ go/scc                          170  479544 
+ rust/tokei                      152   39797 
+─────────────────────────────────────────────
 ```
 
 ## Compare size of a Go file and a Rust file
@@ -65,11 +89,28 @@ tc --whitelist=Go,Rust
 ```bash
 tc --groupby=file foo.go foo.rs
 ```
+```txt
+────────────────────────────
+ Group        Files  Tokens
+────────────────────────────
+ foo.rs           1    1214
+ foo.go           1     757
+────────────────────────────
+```
 
 ## Count comments for each language
 
 ```bash
-tc --kind-pattern=".*comment.*"
+tc --kind-pattern=".*comment"
+```
+```txt
+──────────────────────────────────────────────────
+ Group        Files  Tokens  Pattern(.*comment)
+──────────────────────────────────────────────────
+ Rust            18   10309                    78
+ Go               7    1302                    35
+ Ruby             4     802                    12
+──────────────────────────────────────────────────
 ```
 
 **Note**: Comment nodes can have different names depending on the parser. For a language, you can look in the node-types.json file in the parser repo to see what names are given to different nodes (e.g. [Go Parser Repo's node-types.json](https://github.com/tree-sitter/tree-sitter-go/blob/master/src/node-types.json))
@@ -82,6 +123,20 @@ tc --format=csv > tc-$(date +%m-%d-%Y).csv
 
 These CSV files can then be read and graphed using your tool of choice.
 
+## Compare size of all Go files vs all Rust files in foo/
+
+```bash
+tc --whitelist Go Rust -- foo/
+```
+```txt
+──────────────────────
+ Group  Files  Tokens
+──────────────────────
+ Rust       9    9034
+ Go         6    2011
+──────────────────────
+```
+
 ## See supported languages
 
 ```bash
@@ -90,19 +145,22 @@ tc --list-languages
 
 # Why count tokens instead of lines
 
+TODO
+
 # Usage
 
 ```bash
-$ tc -h
+tc -h
+TODO
 ```
 
 # Counting Tree-sitter Queries
 
-[See the wiki](TODO)
+[See the wiki](https://github.com/RRethy/tc)
 
 # Performance
 
-`tc` parses each file using a Tree-sitter parser to create a full syntax tree. This takes more time than counting lines of code/comments so programs like [tokei](https://github.com/XAMPPRocky/tokei), [scc](https://github.com/boyter/scc), and [cloc](https://github.com/AlDanial/cloc) will typically be faster than `tc`.
+`tc` parses each file using a Tree-sitter parser to create a full syntax tree. This takes more time than only counting lines of code/comments so programs like [tokei](https://github.com/XAMPPRocky/tokei), [scc](https://github.com/boyter/scc), and [cloc](https://github.com/AlDanial/cloc) will typically be faster than `tc`.
 
 Here are some benchmarks using [hyperfine](https://github.com/sharkdp/hyperfine) to give an overview of how much slower it is than line counting programs:
 
@@ -114,7 +172,10 @@ Here are some benchmarks using [hyperfine](https://github.com/sharkdp/hyperfine)
 
 # Limitations
 
-- strings
+TODO
+
+- determining what is a token
+- nested languages
 
 # Acknowledgements
 
