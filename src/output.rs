@@ -27,10 +27,9 @@ impl FromStr for Format {
 
 pub fn format_builder() -> format::FormatBuilder {
     format::FormatBuilder::new()
-        .borders('│')
         .separators(
             &[format::LinePosition::Top],
-            format::LineSeparator::new('─', '─', '╭', '╮'),
+            format::LineSeparator::new('─', '─', '─', '─'),
         )
         .separators(
             &[format::LinePosition::Title],
@@ -38,7 +37,7 @@ pub fn format_builder() -> format::FormatBuilder {
         )
         .separators(
             &[format::LinePosition::Bottom],
-            format::LineSeparator::new('─', '─', '╰', '╯'),
+            format::LineSeparator::new('─', '─', '─', '─'),
         )
         .padding(1, 1)
 }
