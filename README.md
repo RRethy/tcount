@@ -288,13 +288,32 @@ See [QUERIES.md](https://github.com/RRethy/tc/blob/master/QUERIES.md)
 
 Here are some benchmarks using [hyperfine](https://github.com/sharkdp/hyperfine) to give an overview of how much slower it is than line counting programs:
 
-TODO
+[**tc**](https://github.com/RRethy/tc)
 
-[**CPython**](https://github.com/python/cpython.git)
+| Program | Runtime          |
+|---------|------------------|
+| tc      | 19.5 ms ± 1.7 ms |
+| scc     | 13.0 ms ± 1.4 ms |
+| tokei   | 7.2 ms ± 1.2 ms  |
+| cloc    | 1.218 s ± 0.011 s |
 
 [**Redis**](https://github.com/redis/redis)
 
-[**Linux**](https://github.com/torvalds/linux)
+| Program | Runtime          |
+|---------|------------------|
+| tc | 1.339 s ± 0.125 s |
+| scc | 49.9 ms ±  1.6 ms |
+| tokei | 79.9 ms ±  5.3 ms |
+| cloc | 1.331 s ± 0.016 s |
+
+[**CPython**](https://github.com/python/cpython)
+
+| Program | Runtime          |
+|---------|------------------|
+| tc | 11.580 s ± 0.199 s |
+| scc | 256.7 ms ± 3.0 ms |
+| tokei | 512.2 ms ± 96.4 ms |
+| cloc | 12.467 s ± 0.139 s |
 
 # Limitations
 
