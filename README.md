@@ -213,7 +213,7 @@ v.iter() // iterate over the vector
 
 Without the comments, it could be written as `v.iter().map(|n| n * 2).collect::Vec<32>();`.
 
-4. Short syntactical elements in languages are rewarded. For example, the following calculates the mean of a list of numbers in APL:
+4. Short syntactical elements in languages are rewarded. For example:
 
 ```ruby
 [1, 2, 3, 4].map { |n| n * 2 }
