@@ -2,7 +2,7 @@
   <a href="https://github.com/RRethy/tcount">tcount</a>
 </h1>
 
-<p align="center"><em>(pronounced "tee-see")</em></p>
+<p align="center"><em>(pronounced "tee-count")</em></p>
 
 <h4 align="center">Count your code by tokens, types of syntax tree nodes, and patterns in the syntax tree.</h4>
 
