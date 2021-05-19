@@ -320,6 +320,10 @@ Here are some benchmarks using [hyperfine](https://github.com/sharkdp/hyperfine)
 - `tcount` does not support nested languages like ERB. This may change in the future.
 - It's not always clear what is a token, `tcount` treats any node in the syntax tree without children as a token. This usually works, but in some cases, like strings in the Rust Tree-sitter parser which can have children (escape codes), it may produce slightly expected results.
 
+# Why Tree-sitter
+
+Tree-sitter has relatively efficient parsing and has support for many languages without the need to create and maintain individual parsers or lexers. Support for new languages is easy and only requires and up-to-date Tree-sitter parser.
+
 # Contributing
 
 To add support for a new language, add it's information to `https://github.com/RRethy/tcount/blob/master/src/language.rs` and add the language's Tree-sitter parser crate to `Cargo.toml`.
