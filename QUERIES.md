@@ -1,6 +1,6 @@
 # Queries
 
-`tc` has the ability to count [Tree-sitter queries (skim this first)](https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries). These allow you to match patterns in the syntax tree for more fine grained counting.
+`tcount` has the ability to count [Tree-sitter queries (skim this first)](https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries). These allow you to match patterns in the syntax tree for more fine grained counting.
 
 **Note**: Simple queries can probably be replaced with --kind-pattern. (e.g. `--kind-pattern=".*comment"` usually suffices to count comments.)
 
@@ -28,12 +28,12 @@ The language directories must be named according to third column in the output f
 
 ### Query Directory Locations
 
-When `--query=foo` is used, `tc` will begin looking for the `foo` query inside a query directory. When it find a `foo` query for any language, it will stop looking for other query directories and only languages with `foo.scm` in the current query directory will have the query counted.
+When `--query=foo` is used, `tcount` will begin looking for the `foo` query inside a query directory. When it find a `foo` query for any language, it will stop looking for other query directories and only languages with `foo.scm` in the current query directory will have the query counted.
 
 When looking for a query directory with the query, the following locations will be searched:
 
 1. `$PWD/.tc_queries/` will be considered a query directory
-2. `$XDG_CONFIG_HOME/tc/*/` will each (post-expansion) be considered query directories
+2. `$XDG_CONFIG_HOME/tcount/*/` will each (post-expansion) be considered query directories
 
 There is no guarantee about the expansion order for #2 so conflicting queries results in undefined behaviour as to which is used.
 

@@ -1,10 +1,11 @@
 mod utils;
 
-use utils::tc;
+use utils::tcount;
 
 #[test]
 fn test_local_queries() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .env(
             "XDG_CONFIG_HOME",
             format!(
@@ -38,7 +39,8 @@ Ruby,2,43,2
 
 #[test]
 fn test_xdg_queries() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .env(
             "XDG_CONFIG_HOME",
             format!(
@@ -72,7 +74,8 @@ Ruby,2,43,6
 
 #[test]
 fn test_queries_with_captures() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .env(
             "XDG_CONFIG_HOME",
             format!(

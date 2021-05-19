@@ -35,8 +35,8 @@ impl FromStr for Query {
     /// for rust and ruby named queries/rust/comments.scm and queries/ruby/comments.scm, respectively.
     ///
     /// When searching for these query files, first, the present working directory is searched for
-    /// a query directory named .tc_queries/, then $XDG_CONFIG_HOME/tc (defaults to $HOME/.config/tc)
-    /// is searched for query directories that match $XDG_CONFIG_HOME/tc/* (conflicting query files
+    /// a query directory named .tcount_queries/, then $XDG_CONFIG_HOME/tcount (defaults to $HOME/.config/tcount)
+    /// is searched for query directories that match $XDG_CONFIG_HOME/tcount/* (conflicting query files
     /// result in undefined behaviour).
     fn from_str(name: &str) -> std::result::Result<Self, Self::Err> {
         let (kind, name) = match name.find('@') {
@@ -50,9 +50,9 @@ impl FromStr for Query {
         let queries: Option<HashMap<Language, tree_sitter::Query>> = vec![
             // look in pwd for a .tc_queries/ dir
             format!(".tc_queries/*/{}.scm", name),
-            // look in $XDG_CONFIG_HOME/tc/* for a dir with queries
+            // look in $XDG_CONFIG_HOME/tcount/* for a dir with queries
             format!(
-                "{}/tc/*/*/{}.scm",
+                "{}/tcount/*/*/{}.scm",
                 if var("XDG_CONFIG_HOME").unwrap_or(String::new()).len() > 0 {
                     var("XDG_CONFIG_HOME").unwrap().to_string()
                 } else {

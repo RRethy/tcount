@@ -1,19 +1,19 @@
 <h1 align="center">
-  <a href="https://github.com/RRethy/tc">tc</a>
+  <a href="https://github.com/RRethy/tcount">tcount</a>
 </h1>
 
 <p align="center"><em>(pronounced "tee-see")</em></p>
 
 <h4 align="center">Count your code by tokens, types of syntax tree nodes, and patterns in the syntax tree.</h4>
 
-[![Build Status](https://github.com/RRethy/tc/actions/workflows/rust.yml/badge.svg)](https://github.com/RRethy/tc/actions)
+[![Build Status](https://github.com/RRethy/tcount/actions/workflows/rust.yml/badge.svg)](https://github.com/RRethy/tcount/actions)
 
 # Quick Start
 
-Simply run `tc` in your project root to count tokens and files and print the results grouped by Language. E.g.,
+Simply run `tcount` in your project root to count tokens and files and print the results grouped by Language. E.g.,
 
 ```bash
-tc
+tcount
 ```
 ```txt
 ────────────────────────────
@@ -28,7 +28,7 @@ tc
 ## Installation
 
 ```bash
-cargo install --git https://github.com/RRethy/tc.git
+cargo install --git https://github.com/RRethy/tcount.git
 ```
 
 ## Requirements
@@ -36,14 +36,14 @@ cargo install --git https://github.com/RRethy/tc.git
 - Lastest stable [Rust](https://www.rust-lang.org/) compiler.
 - Mac or Linux (untested on Windows but most functionality should work, `--query` option likely will not work on Windows)
 
-# tc Cookbook
+# tcount Cookbook
 
-**Note**: None of these use --query, see [Queries](https://github.com/RRethy/tc/blob/master/QUERIES.md) for information on that option
+**Note**: None of these use --query, see [Queries](https://github.com/RRethy/tcount/blob/master/QUERIES.md) for information on that option
 
 ## Compare size of each language in pwd
 
 ```bash
-tc
+tcount
 ```
 ```txt
 ────────────────────────────
@@ -58,7 +58,7 @@ tc
 ## Top 5 files by token count
 
 ```bash
-tc --groupby=file --top=5
+tcount --groupby=file --top=5
 ```
 ```txt
 ──────────────────────────────────
@@ -75,7 +75,7 @@ tc --groupby=file --top=5
 ## Compare size of two directories
 
 ```bash
-tc --groupby=arg go/scc/ rust/tokei/
+tcount --groupby=arg go/scc/ rust/tokei/
 ```
 ```txt
 ─────────────────────────────────────────────
@@ -89,7 +89,7 @@ tc --groupby=arg go/scc/ rust/tokei/
 ## Compare size of a Go file and a Rust file
 
 ```bash
-tc --groupby=file foo.go foo.rs
+tcount --groupby=file foo.go foo.rs
 ```
 ```txt
 ────────────────────────────
@@ -103,7 +103,7 @@ tc --groupby=file foo.go foo.rs
 ## Count comments for each language
 
 ```bash
-tc --kind-pattern=".*comment"
+tcount --kind-pattern=".*comment"
 ```
 ```txt
 ──────────────────────────────────────────────────
@@ -120,7 +120,7 @@ tc --kind-pattern=".*comment"
 ## Track change in project size over time
 
 ```bash
-tc --format=csv > tc-$(date +%m-%d-%Y).csv
+tcount --format=csv > tcount-$(date +%m-%d-%Y).csv
 ```
 
 These CSV files can then be read and graphed using your tool of choice.
@@ -142,7 +142,7 @@ tc --whitelist Go Rust -- foo/
 ## Supported languages
 
 ```bash
-tc --list-languages
+tcount --list-languages
 ```
 ```
 ──────────────────────────────────────────────────────────────────────
@@ -232,14 +232,14 @@ end
 # Usage
 
 ```bash
-tc -h
+tcount -h
 ```
 ```
-tc 0.1.0
+tcount 0.1.0
 Count your code by tokens, node kinds, and patterns in the syntax tree.
 
 USAGE:
-    tc [FLAGS] [OPTIONS] [--] [paths]...
+    tcount [FLAGS] [OPTIONS] [--] [paths]...
 
 FLAGS:
         --count-hidden        Count hidden files
@@ -265,7 +265,7 @@ OPTIONS:
                                             Supports Rust regular expressions
         --query <query>...                  Tree-sitter queries to match and count. Captures can also be counted with
                                             --query=query_name@capture_name,capture_name2. See
-                                            https://github.com/RRethy/tc/blob/master/QUERIES.md for more information
+                                            https://github.com/RRethy/tcount/blob/master/QUERIES.md for more information
         --sort-by <sort-by>                 One of group|numfiles|tokens. "group" will sort based on --groupby value
                                             [default: tokens]
         --top <top>                         How many of the top results to show
@@ -280,19 +280,19 @@ ARGS:
 
 # Counting Tree-sitter Queries
 
-See [QUERIES.md](https://github.com/RRethy/tc/blob/master/QUERIES.md)
+See [QUERIES.md](https://github.com/RRethy/tcount/blob/master/QUERIES.md)
 
 # Performance
 
-`tc` parses each file using a Tree-sitter parser to create a full syntax tree. This takes more time than only counting lines of code/comments so programs like [tokei](https://github.com/XAMPPRocky/tokei), [scc](https://github.com/boyter/scc), and [cloc](https://github.com/AlDanial/cloc) will typically be faster than `tc`.
+`tcount` parses each file using a Tree-sitter parser to create a full syntax tree. This takes more time than only counting lines of code/comments so programs like [tokei](https://github.com/XAMPPRocky/tokei), [scc](https://github.com/boyter/scc), and [cloc](https://github.com/AlDanial/cloc) will typically be faster than `tcount`.
 
 Here are some benchmarks using [hyperfine](https://github.com/sharkdp/hyperfine) to give an overview of how much slower it is than line counting programs:
 
-[**tc**](https://github.com/RRethy/tc)
+[**tcount**](https://github.com/RRethy/tcount)
 
 | Program | Runtime          |
 |---------|------------------|
-| tc      | 19.5 ms ± 1.7 ms |
+| tcount      | 19.5 ms ± 1.7 ms |
 | scc     | 13.0 ms ± 1.4 ms |
 | tokei   | 7.2 ms ± 1.2 ms  |
 | cloc    | 1.218 s ± 0.011 s |
@@ -301,7 +301,7 @@ Here are some benchmarks using [hyperfine](https://github.com/sharkdp/hyperfine)
 
 | Program | Runtime          |
 |---------|------------------|
-| tc | 1.339 s ± 0.125 s |
+| tcount | 1.339 s ± 0.125 s |
 | scc | 49.9 ms ±  1.6 ms |
 | tokei | 79.9 ms ±  5.3 ms |
 | cloc | 1.331 s ± 0.016 s |
@@ -310,19 +310,19 @@ Here are some benchmarks using [hyperfine](https://github.com/sharkdp/hyperfine)
 
 | Program | Runtime          |
 |---------|------------------|
-| tc | 11.580 s ± 0.199 s |
+| tcount | 11.580 s ± 0.199 s |
 | scc | 256.7 ms ± 3.0 ms |
 | tokei | 512.2 ms ± 96.4 ms |
 | cloc | 12.467 s ± 0.139 s |
 
 # Limitations
 
-- `tc` does not support nested languages like ERB. This may change in the future.
-- It's not always clear what is a token, `tc` treats any node in the syntax tree without children as a token. This usually works, but in some cases, like strings in the Rust Tree-sitter parser which can have children (escape codes), it may produce slightly expected results.
+- `tcount` does not support nested languages like ERB. This may change in the future.
+- It's not always clear what is a token, `tcount` treats any node in the syntax tree without children as a token. This usually works, but in some cases, like strings in the Rust Tree-sitter parser which can have children (escape codes), it may produce slightly expected results.
 
 # Contributing
 
-To add support for a new language, add it's information to `https://github.com/RRethy/tc/blob/master/src/language.rs` and add the language's Tree-sitter parser crate to `Cargo.toml`.
+To add support for a new language, add it's information to `https://github.com/RRethy/tcount/blob/master/src/language.rs` and add the language's Tree-sitter parser crate to `Cargo.toml`.
 
 # Acknowledgements
 

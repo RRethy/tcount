@@ -1,10 +1,11 @@
 mod utils;
 
-use utils::tc;
+use utils::tcount;
 
 #[test]
 fn test_whitelist() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .args(["--format", "csv", "--whitelist", "Rust", "Ruby"].iter())
         .assert()
         .stdout(
@@ -18,7 +19,8 @@ Ruby,2,43
 
 #[test]
 fn test_blacklist() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .args(["--format", "csv", "--blacklist", "Rust", "Ruby"].iter())
         .assert()
         .stdout(
@@ -32,7 +34,8 @@ Unsupported,1,0
 
 #[test]
 fn test_groupby_language() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .args(["--format", "csv", "--groupby", "language"].iter())
         .assert()
         .stdout(
@@ -48,7 +51,8 @@ Unsupported,1,0
 
 #[test]
 fn test_groupby_file() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .args(["--format", "csv", "--groupby", "file", "--whitelist", "Go"].iter())
         .assert()
         .stdout(
@@ -61,7 +65,8 @@ fn test_groupby_file() {
 
 #[test]
 fn test_groupby_arguments() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .args(
             [
                 "--format",
@@ -88,7 +93,8 @@ ruby.rb,1,10
 
 #[test]
 fn test_sortby_group() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .args(["--format", "csv", "--sort-by", "group"].iter())
         .assert()
         .stdout(
@@ -104,7 +110,8 @@ Unsupported,1,0
 
 #[test]
 fn test_sortby_numfiles() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .args(
             [
                 "--format",
@@ -131,7 +138,8 @@ Go,1,52
 
 #[test]
 fn test_sortby_tokens() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .args(["--format", "csv", "--sort-by", "tokens"].iter())
         .assert()
         .stdout(
@@ -147,7 +155,8 @@ Unsupported,1,0
 
 #[test]
 fn test_show_totals() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .args(["--format", "csv", "--show-totals"].iter())
         .assert()
         .stdout(
@@ -164,7 +173,8 @@ TOTALS,9,251
 
 #[test]
 fn test_count_node_kinds() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .args(["--format", "csv", "--kind", "line_comment"].iter())
         .assert()
         .stdout(
@@ -180,7 +190,8 @@ Unsupported,1,0,0
 
 #[test]
 fn test_count_node_kind_patterns() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .args(["--format", "csv", "--kind-pattern", ".*comment.*"].iter())
         .assert()
         .stdout(
@@ -196,7 +207,8 @@ Unsupported,1,0,0
 
 #[test]
 fn test_top_n() {
-    tc().current_dir("tests/fixtures/")
+    tcount()
+        .current_dir("tests/fixtures/")
         .args(["--format", "csv", "--top", "2"].iter())
         .assert()
         .stdout(

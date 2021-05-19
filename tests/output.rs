@@ -1,6 +1,6 @@
 mod utils;
 
-use utils::tc;
+use utils::tcount;
 
 #[test]
 fn test_format_csv() {
@@ -11,7 +11,8 @@ Ruby,2,43
 Unsupported,1,0
 ";
 
-    tc().current_dir("tests/fixtures")
+    tcount()
+        .current_dir("tests/fixtures")
         .args(["--format", "csv"].iter())
         .assert()
         .stdout(expected)
@@ -29,7 +30,8 @@ fn test_format_table() {
  Unsupported      1       0 
 ────────────────────────────
 ";
-    tc().current_dir("tests/fixtures")
+    tcount()
+        .current_dir("tests/fixtures")
         .args(["--format", "table"].iter())
         .assert()
         .stdout(expected)

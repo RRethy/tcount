@@ -8,7 +8,7 @@ use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
 #[structopt(
-    name = "tc",
+    name = "tcount",
     about = "Count your code by tokens, node kinds, and patterns in the syntax tree."
 )]
 pub struct Cli {
@@ -35,7 +35,7 @@ pub struct Cli {
 
     #[structopt(
         long,
-        help = "Tree-sitter queries to match and count. Captures can also be counted with --query=query_name@capture_name,capture_name2. See https://github.com/RRethy/tc/blob/master/QUERIES.md for more information"
+        help = "Tree-sitter queries to match and count. Captures can also be counted with --query=query_name@capture_name,capture_name2. See https://github.com/RRethy/tcount/blob/master/QUERIES.md for more information"
     )]
     pub query: Vec<Query>,
 

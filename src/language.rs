@@ -281,7 +281,7 @@ static EXT_TO_LANGUAGE: phf::Map<&'static str, Language> = phf::phf_map! {
 };
 
 /// These dir names are used when reading query files to know what language they refer to.
-/// See tc --help for more information on queries.
+/// See tcount --help for more information on queries.
 static DIR_TO_LANGUAGE: phf::Map<&'static str, Language> = phf::phf_map! {
     "bash"             => Language::Bash,
     "bibtex"           => Language::BibTeX,
