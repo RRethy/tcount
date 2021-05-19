@@ -32,7 +32,7 @@ When `--query=foo` is used, `tcount` will begin looking for the `foo` query insi
 
 When looking for a query directory with the query, the following locations will be searched:
 
-1. `$PWD/.tc_queries/` will be considered a query directory
+1. `$PWD/.tcount_queries/` will be considered a query directory
 2. `$XDG_CONFIG_HOME/tcount/*/` will each (post-expansion) be considered query directories
 
 There is no guarantee about the expansion order for #2 so conflicting queries results in undefined behaviour as to which is used.

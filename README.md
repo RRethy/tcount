@@ -128,7 +128,7 @@ These CSV files can then be read and graphed using your tool of choice.
 ## Compare size of all Go files vs all Rust files in foo/
 
 ```bash
-tc --whitelist Go Rust -- foo/
+tcount --whitelist Go Rust -- foo/
 ```
 ```txt
 ──────────────────────

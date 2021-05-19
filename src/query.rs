@@ -31,7 +31,7 @@ impl FromStr for Query {
     ///
     /// A query directory is as a directory with subdirectories that contain query files with the
     /// name "{query name}.scm". These subdirectories are named based on the language those queries
-    /// are written for. For example, a query directory tc_queries/ could have a "comments" query
+    /// are written for. For example, a query directory tcount_queries/ could have a "comments" query
     /// for rust and ruby named queries/rust/comments.scm and queries/ruby/comments.scm, respectively.
     ///
     /// When searching for these query files, first, the present working directory is searched for
@@ -48,8 +48,8 @@ impl FromStr for Query {
         };
 
         let queries: Option<HashMap<Language, tree_sitter::Query>> = vec![
-            // look in pwd for a .tc_queries/ dir
-            format!(".tc_queries/*/{}.scm", name),
+            // look in pwd for a .tcount_queries/ dir
+            format!(".tcount_queries/*/{}.scm", name),
             // look in $XDG_CONFIG_HOME/tcount/* for a dir with queries
             format!(
                 "{}/tcount/*/*/{}.scm",
