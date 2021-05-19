@@ -56,7 +56,7 @@ impl FromStr for Query {
                 if var("XDG_CONFIG_HOME").unwrap_or(String::new()).len() > 0 {
                     var("XDG_CONFIG_HOME").unwrap().to_string()
                 } else {
-                    format!("~/{}", ".config")
+                    "~/.config".into()
                 },
                 name
             ),
