@@ -40,7 +40,8 @@ cargo install --git https://github.com/RRethy/tcount.git
 
 **Note**: None of these use --query, see [Queries](https://github.com/RRethy/tcount/blob/master/QUERIES.md) for information on that option
 
-## Compare size of each language in pwd
+<details><summary>Compare size of each language in pwd</summary>
+<p>
 
 ```bash
 tcount
@@ -55,7 +56,11 @@ tcount
 ────────────────────────────
 ```
 
-## Top 5 files by token count
+</p>
+</details>
+
+<details><summary>Top 5 files by token count</summary>
+<p>
 
 ```bash
 tcount --groupby=file --top=5
@@ -72,7 +77,11 @@ tcount --groupby=file --top=5
 ──────────────────────────────────
 ```
 
-## Compare size of two directories
+</p>
+</details>
+
+<details><summary>Compare size of two directories</summary>
+<p>
 
 ```bash
 tcount --groupby=arg go/scc/ rust/tokei/
@@ -86,7 +95,11 @@ tcount --groupby=arg go/scc/ rust/tokei/
 ─────────────────────────────────────────────
 ```
 
-## Compare size of a Go file and a Rust file
+</p>
+</details>
+
+<details><summary>Compare size of a Go file and a Rust file</summary>
+<p>
 
 ```bash
 tcount --groupby=file foo.go foo.rs
@@ -100,7 +113,11 @@ tcount --groupby=file foo.go foo.rs
 ────────────────────────────
 ```
 
-## Count comments for each language
+</p>
+</details>
+
+<details><summary>Count comments for each language</summary>
+<p>
 
 ```bash
 tcount --kind-pattern=".*comment"
@@ -117,7 +134,11 @@ tcount --kind-pattern=".*comment"
 
 **Note**: Comment nodes can have different names depending on the parser. For a language, you can look in the node-types.json file in the parser repo to see what names are given to different nodes (e.g. [Go Parser Repo's node-types.json](https://github.com/tree-sitter/tree-sitter-go/blob/master/src/node-types.json))
 
-## Track change in project size over time
+</p>
+</details>
+
+<details><summary>Track change in project size over time</summary>
+<p>
 
 ```bash
 tcount --format=csv > tcount-$(date +%m-%d-%Y).csv
@@ -125,7 +146,11 @@ tcount --format=csv > tcount-$(date +%m-%d-%Y).csv
 
 These CSV files can then be read and graphed using your tool of choice.
 
-## Compare size of all Go files vs all Rust files in foo/
+</p>
+</details>
+
+<details><summary>Compare size of all Go files vs all Rust files in foo/</summary>
+<p>
 
 ```bash
 tcount --whitelist Go Rust -- foo/
@@ -139,7 +164,11 @@ tcount --whitelist Go Rust -- foo/
 ──────────────────────
 ```
 
-## Supported languages
+</p>
+</details>
+
+<details><summary>Supported languages</summary>
+<p>
 
 ```bash
 tcount --list-languages
@@ -176,6 +205,9 @@ tcount --list-languages
  Typescript         .ts                               typescript 
 ──────────────────────────────────────────────────────────────────────
 ```
+
+</p>
+</details>
 
 # Why count tokens instead of lines
 
