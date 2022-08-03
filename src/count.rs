@@ -1,5 +1,4 @@
 use crate::error::{Error, Result};
-use crate::language::Language;
 use crate::query::{Query, QueryKind};
 use crate::tree::TreeIterator;
 use regex::Regex;
@@ -7,7 +6,8 @@ use std::collections::HashMap;
 use std::fs;
 use std::ops::AddAssign;
 use std::path::Path;
-use tree_sitter::{Node, Parser, QueryCursor};
+use tree_sitter::{Parser, QueryCursor};
+use tree_sitter_loader::Loader;
 
 /// Counts contains the cumulative totals for the how many files, number of tokens, number of nodes
 /// matching each kind specified by --kind, and number of matches for each query specified by
@@ -74,24 +74,11 @@ impl Counts {
     /// Try to count @path for the specified arguments
     pub fn from_path(
         path: impl AsRef<Path>,
-        lang: &Language,
+        language: tree_sitter::Language,
         kinds: &Vec<String>,
         kind_patterns: &Vec<Regex>,
         queries: &Vec<Query>,
     ) -> Result<Self> {
-        let ts_lang = {
-            match lang.get_treesitter_language() {
-                Ok(ts_lang) => ts_lang,
-                Err(_) => {
-                    // Unsupported language gets an *empty* Counts struct
-                    return Ok(Counts {
-                        nfiles: 1,
-                        ..Counts::empty(kinds.len(), kind_patterns.len(), queries)
-                    });
-                }
-            }
-        };
-
         let mut ntokens = 0;
         let mut nkinds = vec![0; kinds.len()];
         let mut nkind_patterns = vec![0; kind_patterns.len()];
@@ -101,21 +88,20 @@ impl Counts {
         let text = fs::read_to_string(path.as_ref())?;
         let mut parser = Parser::new();
         parser
-            .set_language(ts_lang)
+            .set_language(language)
             .expect("Unexpected internal error setting parser language");
 
         let mut qcursor = QueryCursor::new();
-        let text_callback = |n: Node| &text[n.byte_range()]; // weird but needed argument for queries
         match parser.parse(&text, None) {
             Some(tree) => {
                 queries.iter().for_each(|query| {
-                    if let Some(ts_query) = query.langs.get(lang) {
+                    if let Some(ts_query) = query.langs.get(language) {
                         match &query.kind {
                             QueryKind::Match => {
                                 nmatch_queries.insert(
                                     &query.name,
                                     qcursor
-                                        .matches(ts_query, tree.root_node(), text_callback)
+                                        .matches(ts_query, tree.root_node(), text.as_bytes())
                                         .count() as u64,
                                 );
                             }
@@ -125,7 +111,7 @@ impl Counts {
                                 // query
                                 let capture_names = ts_query.capture_names();
                                 qcursor
-                                    .captures(ts_query, tree.root_node(), text_callback)
+                                    .captures(ts_query, tree.root_node(), text.as_bytes())
                                     .for_each(|(qmatch, _)| {
                                         qmatch.captures.iter().for_each(|capture| {
                                             *ncapture_queries

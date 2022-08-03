@@ -4,12 +4,13 @@ use std::iter::FromIterator;
 use std::path::{Path, PathBuf};
 use std::process;
 use structopt::StructOpt;
+use tree_sitter_config::Config;
+use tree_sitter_loader::Loader;
 
 mod cli;
 mod count;
 mod error;
 mod fs;
-mod language;
 mod output;
 mod query;
 mod tree;
@@ -17,10 +18,10 @@ mod tree;
 use cli::{GroupBy, SortBy};
 use count::Counts;
 use error::{Error, Result};
-use language::Language;
 use output::print;
 
 fn get_counts_for_paths(
+    loader: &Loader,
     paths: &Vec<impl AsRef<Path>>,
     cli: &cli::Cli,
     whitelist: &HashSet<String>,
@@ -43,7 +44,14 @@ fn get_counts_for_paths(
         };
 
         if ignore_path {
-            let counts = Counts::from_path(&path, &lang, &cli.kind, &cli.kind_pattern, &cli.query)?;
+            let counts = Counts::from_path(
+                &loader,
+                &path,
+                &lang,
+                &cli.kind,
+                &cli.kind_pattern,
+                &cli.query,
+            )?;
             Ok((lang, path, counts))
         } else {
             Err(Error::LanguageIgnored(path, lang))
@@ -57,12 +65,18 @@ fn get_counts_for_paths(
 }
 
 fn run(cli: cli::Cli) -> Result<()> {
+    let mut loader = Loader::new().unwrap();
+    let config = Config::load().unwrap();
+    let loader_config: tree_sitter_loader::Config = config.get().unwrap();
+    loader.find_all_languages(&loader_config).unwrap();
+
     let whitelist: HashSet<String> = HashSet::from_iter(cli.whitelist.iter().cloned());
     let blacklist: HashSet<String> = HashSet::from_iter(cli.blacklist.iter().cloned());
 
     let (mut counts, errors): (Vec<(String, Counts)>, Vec<Error>) = match cli.groupby {
         GroupBy::Language => {
-            let (counts, errors) = get_counts_for_paths(&cli.paths, &cli, &whitelist, &blacklist);
+            let (counts, errors) =
+                get_counts_for_paths(&loader, &cli.paths, &cli, &whitelist, &blacklist);
             let counts = counts
                 .into_iter()
                 .fold(HashMap::new(), |mut acc, (lang, _path, counts)| {
@@ -159,7 +173,7 @@ fn main() {
     let cli = cli::Cli::from_args();
 
     if cli.list_languages {
-        Language::print_all();
+        println!("TODO");
     } else {
         match run(cli) {
             Err(err) => {
