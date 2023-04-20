@@ -8,6 +8,18 @@
 
 [![Build Status](https://github.com/RRethy/tcount/actions/workflows/rust.yml/badge.svg)](https://github.com/RRethy/tcount/actions)
 
+**Note: A dependency broke the release build, execution only works via `cargo run` and `cargo build` atm.**
+
+## Installation
+
+```bash
+git clone https://github.com/RRethy/tcount.git
+cd tcount
+cargo build --release
+cp ./target/release/tcount ~/bin
+PATH=~/bin:$PATH
+```
+
 # Quick Start
 
 Simply run `tcount` in your project root to count tokens and files and print the results grouped by Language. E.g.,
@@ -23,12 +35,6 @@ tcount
  Go               8    4539
  Ruby             6    1301
 ────────────────────────────
-```
-
-## Installation
-
-```bash
-cargo install --git https://github.com/RRethy/tcount.git
 ```
 
 ## Requirements
