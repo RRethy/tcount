@@ -10,7 +10,7 @@ use std::str::FromStr;
 #[derive(Debug)]
 pub enum Format {
     Table,
-    CSV,
+    Csv,
 }
 
 impl FromStr for Format {
@@ -19,7 +19,7 @@ impl FromStr for Format {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "table" => Ok(Format::Table),
-            "csv" => Ok(Format::CSV),
+            "csv" => Ok(Format::Csv),
             _ => Err(format!("\"{}\" is not supported. Use one of table|csv", s)),
         }
     }
@@ -78,9 +78,9 @@ pub fn print(
     kinds
         .iter()
         .for_each(|kind| titles.push(title_cell(&format!("Kind({})", kind))));
-    kind_patterns.iter().for_each(|kind_pat| {
-        titles.push(title_cell(&format!("Pattern({})", kind_pat.to_string())))
-    });
+    kind_patterns
+        .iter()
+        .for_each(|kind_pat| titles.push(title_cell(&format!("Pattern({})", kind_pat))));
     queries.iter().for_each(|query| match &query.kind {
         QueryKind::Match => titles.push(title_cell(&format!("Query({})", query.name))),
         QueryKind::Captures(names) => names.iter().for_each(|name| {
@@ -133,7 +133,7 @@ pub fn print(
         Format::Table => {
             table.printstd();
         }
-        Format::CSV => match table.to_csv(std::io::stdout()) {
+        Format::Csv => match table.to_csv(std::io::stdout()) {
             Ok(_) => {}
             Err(err) => eprintln!("{}", err),
         },
@@ -144,17 +144,19 @@ pub fn print_languages(langs: Vec<(&Language, Vec<String>, &Vec<String>)>) {
     let mut table = Table::new();
     table.set_format(format_builder().build());
 
-    let mut titles = Vec::with_capacity(3);
-    titles.push(title_cell("Language"));
-    titles.push(title_cell("Extensions"));
-    titles.push(title_cell("Query Dir Name"));
+    let titles = vec![
+        title_cell("Language"),
+        title_cell("Extensions"),
+        title_cell("Query Dir Name"),
+    ];
     table.set_titles(Row::new(titles));
 
     langs.into_iter().for_each(|(lang, exts, dirs)| {
-        let mut cols = Vec::new();
-        cols.push(label_cell(&lang.to_string()));
-        cols.push(generic_cell(exts.join(",")));
-        cols.push(generic_cell(dirs.join(",")));
+        let cols = vec![
+            label_cell(&lang.to_string()),
+            generic_cell(exts.join(",")),
+            generic_cell(dirs.join(",")),
+        ];
         table.add_row(Row::new(cols));
     });
 

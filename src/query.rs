@@ -53,8 +53,8 @@ impl FromStr for Query {
             // look in $XDG_CONFIG_HOME/tcount/* for a dir with queries
             format!(
                 "{}/tcount/*/*/{}.scm",
-                if var("XDG_CONFIG_HOME").unwrap_or(String::new()).len() > 0 {
-                    var("XDG_CONFIG_HOME").unwrap().to_string()
+                if !var("XDG_CONFIG_HOME").unwrap_or(String::new()).is_empty() {
+                    var("XDG_CONFIG_HOME").unwrap()
                 } else {
                     "~/.config".into()
                 },
@@ -87,8 +87,8 @@ impl FromStr for Query {
                                 .for_each(|name| query.disable_capture(name));
                         }
                         QueryKind::Match => {
-                            let names: Vec<String> = query.capture_names().clone().into();
-                            names.iter().for_each(|name| query.disable_capture(&name));
+                            let names: Vec<String> = query.capture_names().into();
+                            names.iter().for_each(|name| query.disable_capture(name));
                         }
                     }
                     Ok((lang, query))
@@ -96,8 +96,7 @@ impl FromStr for Query {
                 .filter_map(Result::ok)
                 .collect()
         })
-        .filter(|map: &HashMap<Language, tree_sitter::Query>| map.len() > 0)
-        .next();
+        .find(|map: &HashMap<Language, tree_sitter::Query>| !map.is_empty());
 
         if let Some(queries) = queries {
             Ok(Query {

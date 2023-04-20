@@ -3,15 +3,15 @@ use rayon::prelude::*;
 use std::path::{Path, PathBuf};
 
 /// Recursively iterate over @paths and produce a parallel and unordered iterator over the files encountered.
-pub fn iter_paths<'a>(
-    paths: &Vec<impl AsRef<Path>>,
+pub fn iter_paths(
+    paths: &[impl AsRef<Path>],
     no_git: bool,
     count_hidden: bool,
     no_dot_ignore: bool,
     no_parent_ignore: bool,
 ) -> impl ParallelIterator<Item = Result<PathBuf>> {
     let mut builder = ignore::WalkBuilder::new(paths.first().unwrap());
-    &paths[1..].iter().for_each(|path| {
+    let _ = &paths[1..].iter().for_each(|path| {
         builder.add(path);
     });
     // We synchronously walk the filesystem and use rayon's .par_bridge to create a parallel
@@ -26,7 +26,6 @@ pub fn iter_paths<'a>(
         .ignore(!no_dot_ignore)
         .parents(!no_parent_ignore)
         .build()
-        .into_iter()
         .par_bridge()
         .filter_map(|entry| match entry {
             Ok(dir) => {

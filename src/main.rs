@@ -21,7 +21,7 @@ use language::Language;
 use output::print;
 
 fn get_counts_for_paths(
-    paths: &Vec<impl AsRef<Path>>,
+    paths: &[impl AsRef<Path>],
     cli: &cli::Cli,
     whitelist: &HashSet<String>,
     blacklist: &HashSet<String>,
@@ -36,8 +36,8 @@ fn get_counts_for_paths(
     .map(|res| {
         let path = res?;
         let lang = Language::from(path.as_ref());
-        let ignore_path = if whitelist.len() == 0 {
-            blacklist.len() == 0 || !blacklist.contains(&lang.to_string())
+        let ignore_path = if whitelist.is_empty() {
+            blacklist.is_empty() || !blacklist.contains(&lang.to_string())
         } else {
             whitelist.contains(&lang.to_string())
         };
@@ -91,11 +91,11 @@ fn run(cli: cli::Cli) -> Result<()> {
                 .par_iter()
                 .map(|path| {
                     let (counts, errors) =
-                        get_counts_for_paths(&vec![path], &cli, &whitelist, &blacklist);
+                        get_counts_for_paths(&[path], &cli, &whitelist, &blacklist);
                     let counts = counts.into_iter().fold(
                         Counts::empty(cli.kind.len(), cli.kind_pattern.len(), &cli.query),
                         |mut acc, (_lang, _path, counts)| {
-                            acc += counts.clone();
+                            acc += counts;
                             acc
                         },
                     );
@@ -133,7 +133,7 @@ fn run(cli: cli::Cli) -> Result<()> {
         counts
     };
 
-    if counts.len() > 0 {
+    if !counts.is_empty() {
         print(
             &cli.format,
             counts,
@@ -160,13 +160,8 @@ fn main() {
 
     if cli.list_languages {
         Language::print_all();
-    } else {
-        match run(cli) {
-            Err(err) => {
-                eprintln!("{}", err);
-                process::exit(1);
-            }
-            _ => {}
-        }
+    } else if let Err(err) = run(cli) {
+        eprintln!("{}", err);
+        process::exit(1);
     }
 }

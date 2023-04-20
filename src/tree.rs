@@ -61,7 +61,7 @@ fn main() {
 }";
         let mut parser = tree_sitter::Parser::new();
         parser.set_language(tree_sitter_rust::language()).unwrap();
-        let tree = parser.parse(&text, None).unwrap();
+        let tree = parser.parse(text, None).unwrap();
         let tree_iter = TreeIterator::new(&tree);
         let kinds = vec![
             "source_file",

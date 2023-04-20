@@ -23,19 +23,19 @@ pub struct Counts {
 
 impl Counts {
     /// Create a Counts struct with zero values and correctly sized fields
-    pub fn empty(nkinds: usize, nkind_patterns: usize, queries: &Vec<Query>) -> Counts {
+    pub fn empty(nkinds: usize, nkind_patterns: usize, queries: &[Query]) -> Counts {
         Counts {
             nfiles: 0,
             ntokens: 0,
             nkinds: vec![0; nkinds],
             nkind_patterns: vec![0; nkind_patterns],
-            nqueries: Self::nqueries(&queries, HashMap::new(), HashMap::new()),
+            nqueries: Self::nqueries(queries, HashMap::new(), HashMap::new()),
         }
     }
 
     /// Convert @nmatches and @ncaptures into a deterministically ordered vector
     fn nqueries(
-        queries: &Vec<Query>,
+        queries: &[Query],
         nmatches: HashMap<&String, u64>,
         ncaptures: HashMap<(&String, &String), u64>,
     ) -> Vec<u64> {
@@ -50,7 +50,7 @@ impl Counts {
                     .map(|name| ncaptures.get(&(&query.name, name)).unwrap_or(&0))
                     .collect(),
             })
-            .map(|n| n.clone())
+            .copied()
             .collect()
     }
 }
@@ -58,7 +58,7 @@ impl Counts {
 impl AddAssign for Counts {
     fn add_assign(&mut self, other: Self) {
         #[inline(always)]
-        fn add(l: &mut Vec<u64>, r: &Vec<u64>) {
+        fn add(l: &mut [u64], r: &Vec<u64>) {
             // element-wise addition of two equal-sized vectors
             l.iter_mut().zip(r).for_each(|(a, b)| *a += b);
         }
@@ -77,7 +77,7 @@ impl Counts {
         lang: &Language,
         kinds: &Vec<String>,
         kind_patterns: &Vec<Regex>,
-        queries: &Vec<Query>,
+        queries: &[Query],
     ) -> Result<Self> {
         let ts_lang = {
             match lang.get_treesitter_language() {

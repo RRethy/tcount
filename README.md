@@ -10,8 +10,6 @@
 
 # Quick Start
 
-**Note: A dependency broke the release build by modifying its tagged version, execution only works via `cargo run` atm.**
-
 Simply run `tcount` in your project root to count tokens and files and print the results grouped by Language. E.g.,
 
 ```bash

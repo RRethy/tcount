@@ -35,20 +35,20 @@ impl Error {
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::IO(err) => write!(f, "IO Error: {}\n", err),
-            Error::UnsupportedLanguage => write!(f, "Unsupported Language\n"),
-            Error::Parser(path) => write!(f, "Parser Error for path {}\n", path.display()),
-            Error::QueryError(err) => write!(f, "Tree-sitter Query Error: {:?}\n", err),
-            Error::Ignore(err) => write!(f, "Error while walking filetree: {}\n", err),
+            Error::IO(err) => writeln!(f, "IO Error: {}", err),
+            Error::UnsupportedLanguage => writeln!(f, "Unsupported Language"),
+            Error::Parser(path) => writeln!(f, "Parser Error for path {}", path.display()),
+            Error::QueryError(err) => writeln!(f, "Tree-sitter Query Error: {:?}", err),
+            Error::Ignore(err) => writeln!(f, "Error while walking filetree: {}", err),
             Error::LanguageIgnored(path, lang) => {
-                write!(
+                writeln!(
                     f,
-                    "Language({}) for path({}) is ignored due to whitelist/blacklist options\n",
+                    "Language({}) for path({}) is ignored due to whitelist/blacklist options",
                     lang,
                     path.display()
                 )
             }
-            Error::Glob(err) => write!(f, "Error with globbing {}\n", err),
+            Error::Glob(err) => writeln!(f, "Error with globbing {}", err),
         }
     }
 }
